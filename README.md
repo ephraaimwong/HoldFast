@@ -11,9 +11,29 @@ Brief Description of the application
 #### Steps to Set Up
 
 1. Clone this repository
+
    * Terminal: SSH `git clone git@github.com:ephraaimwong/HoldFast.git`
    * [GitHub Desktop](https://docs.github.com/en/desktop/adding-and-cloning-repositories/cloning-a-repository-from-github-to-github-desktop)
 2. Install dependencies
+   Check for Node and npm versions
+
+   1. `node -v `
+   2. `npm -v `
+
+   Setup packages
+
+   1. `npm install react@19.0.0 react-dom@19.0.0 @react-three/fiber@9.0.4 @react-three/drei@10.0.4`
+   2. Verify Installation in package.json
+      ```
+      ...
+      "dependencies": {
+      "@react-three/drei": "^10.0.4",
+      "@react-three/fiber": "^9.0.4",
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
+      }
+      ...
+      ```
 3. Set up environment variables
 4. Start the application
 
