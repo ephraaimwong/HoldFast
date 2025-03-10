@@ -10,6 +10,7 @@ function App() {
   return (
     <>
       <h1>Introducing THE CUBE</h1>
+      <p> R - Toggle Cube Rotation</p>
       <Scene/>
     </>
   )

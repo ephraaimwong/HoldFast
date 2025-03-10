@@ -3,12 +3,11 @@ import { useFrame, Canvas } from '@react-three/fiber';
 // import { Sphere, OrbitControls } from '@react-three/drei';
 // import gsap from 'gsap';
 
-const Cube = ({onCubeClick}) => {
+const Cube = ({ spinToggle}) => {
     const cubeRef = useRef();
-    const [hovered, setHovered] = useState(false);
-
+    
     useEffect(()=> {
-        if(hovered){
+        if(spinToggle){
             const interval = setInterval(() => {
                 if(cubeRef.current){
                     cubeRef.current.rotation.x += 0.05;
@@ -17,7 +16,7 @@ const Cube = ({onCubeClick}) => {
             },16); //update at 60 fps
             return () => clearInterval(interval);
         }
-    }, [hovered]);
+    }, [spinToggle]);
 
 
   return (
@@ -25,27 +24,32 @@ const Cube = ({onCubeClick}) => {
     <mesh
       ref={cubeRef}
       position={[0,0,0]} //center cube in canvas
-      onPointerOver={() => setHovered(true)} //when mouse hovers over cube
-      onPointerOut={() => setHovered(false)} //when mouse leaves cube
-      onClick={onCubeClick} //trigger effect when cube is clicked
     >
     
     <boxGeometry args={[1,1,1]}/>
-    <meshStandardMaterial color={hovered ? 'hotpink' : 'green'}/>
+    <meshStandardMaterial color={spinToggle ? 'hotpink' : 'green'}/>
     </mesh>
   )
 }
 
     const Scene = () => {
-        const handleCubeClick = () => {
-            console.log('Cube clicked!');
-            //apply animation
-        };
+        const[spinToggle, setSpinToggle]=useState(false);
+
+        useEffect(()=> {
+            const handleKeyPress = (event) => {
+                if(event.key.toLowerCase() === 'r'){
+                    setSpinToggle(spinToggle => !spinToggle);
+                }
+            };
+            window.addEventListener('keydown', handleKeyPress);
+            return () => window.removeEventListener('keydown', handleKeyPress);
+        },[]);
+
         return (
             <Canvas style={{height: '70vh', width: '100%', display:'block'}} camera={{position: [0,0,5]}}>
                 <ambientLight intensity={.5}/>
                 <directionalLight position={[10,15,5]} intensity={5}/>{/*position[x,y,z] */}
-                <Cube onCubeClick={handleCubeClick}/>
+                <Cube spinToggle={spinToggle}/>
 
 
             </Canvas>
