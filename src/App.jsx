@@ -11,6 +11,8 @@ function App() {
     <>
       <h1>Introducing THE CUBE</h1>
       <p> R - Toggle Cube Rotation</p>
+      <p>w a s d || arrow keys to rotate THE CUBE</p>
+      <p>1,2 accelerates rotation in either direction</p>
       <Scene/>
     </>
   )
