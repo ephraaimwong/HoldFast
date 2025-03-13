@@ -2,278 +2,288 @@ import React, { useRef, useState, useEffect } from 'react'; // Import React hook
 import { useFrame, Canvas } from '@react-three/fiber'; // Import React Three Fiber components for 3D rendering
 import * as THREE from 'three'; // Import Three.js core library for 3D math and objects
 
-// Cube component handles core cube logic and interactions
+// Cube component manages the main cube and its interactions
 const Cube = ({ spinToggle, setSpinToggle, rotationSpeed }) => {
+    // State and ref setup for cube interactions
     const cubeRef = useRef(); // Reference to the main cube mesh for direct manipulation
     const [isDragged, setIsDragged] = useState(false); // Tracks if the cube is being dragged with the mouse
     const [lastMousePos, setLastMousePos] = useState(null); // Stores last mouse position for drag calculations
     const keyRotationSpeed = 2; // Fixed speed for keyboard-based rotation
     const [fuseActive, setFuseActive] = useState(true); // State to control whether the fuse animation is active
 
-    // Keyboard-based rotation logic using WASD and arrow keys
+    // Handle keyboard input for cube rotation
     useEffect(() => {
-        const activeKeys = new Set(); // Set to track currently pressed keys
-        const handleKeyDown = (event) => { // Handle key press events
+        const activeKeys = new Set();
+        const handleKeyDown = (event) => {
             if (["arrowup", "arrowdown", "arrowleft", "arrowright"].includes(event.key.toLowerCase())) {
-                event.preventDefault(); // Prevent default scrolling behavior for arrow keys
+                event.preventDefault();
             }
-            activeKeys.add(event.key.toLowerCase()); // Add pressed key to the set
+            activeKeys.add(event.key.toLowerCase());
             if (["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(event.key.toLowerCase())) {
-                setSpinToggle(false); // Disable auto-rotation when using keyboard controls
+                setSpinToggle(false);
             }
         };
-        const handleKeyUp = (event) => activeKeys.delete(event.key.toLowerCase()); // Remove key from set on release
-        const updateRotation = () => { // Continuously update cube rotation based on active keys
-            if (!cubeRef.current) return; // Exit if cube ref isn’t available
-            let deltaX = 0, deltaY = 0; // Rotation changes for X and Y axes
-            if (activeKeys.has('w') || activeKeys.has('arrowup')) deltaX -= keyRotationSpeed; // Tilt up
-            if (activeKeys.has('s') || activeKeys.has('arrowdown')) deltaX += keyRotationSpeed; // Tilt down
-            if (activeKeys.has('a') || activeKeys.has('arrowleft')) deltaY -= keyRotationSpeed; // Rotate left
-            if (activeKeys.has('d') || activeKeys.has('arrowright')) deltaY += keyRotationSpeed; // Rotate right
-            if (deltaX !== 0 || deltaY !== 0) { // Apply rotation if there’s any change
-                const eulerRotation = new THREE.Euler( // Create Euler rotation from angles
-                    THREE.MathUtils.degToRad(deltaX), // Convert degrees to radians for X
-                    THREE.MathUtils.degToRad(deltaY), // Convert degrees to radians for Y
-                    0, // No rotation on Z axis
-                    'XYZ' // Rotation order
+        const handleKeyUp = (event) => activeKeys.delete(event.key.toLowerCase());
+        const updateRotation = () => {
+            if (!cubeRef.current) return;
+            let deltaX = 0, deltaY = 0; // Initialize rotation deltas
+            if (activeKeys.has('w') || activeKeys.has('arrowup')) deltaX -= keyRotationSpeed; // Subtract 2 from X delta
+            if (activeKeys.has('s') || activeKeys.has('arrowdown')) deltaX += keyRotationSpeed; // Add 2 to X delta
+            if (activeKeys.has('a') || activeKeys.has('arrowleft')) deltaY -= keyRotationSpeed; // Subtract 2 from Y delta
+            if (activeKeys.has('d') || activeKeys.has('arrowright')) deltaY += keyRotationSpeed; // Add 2 to Y delta
+            if (deltaX !== 0 || deltaY !== 0) {
+                const eulerRotation = new THREE.Euler(
+                    THREE.MathUtils.degToRad(deltaX), // Convert deltaX (degrees) to radians
+                    THREE.MathUtils.degToRad(deltaY), // Convert deltaY (degrees) to radians
+                    0, // Z rotation remains 0
+                    'XYZ' // Apply rotations in X, Y, Z order
                 );
-                const quaternion = new THREE.Quaternion(); // Create quaternion for smooth rotation
-                quaternion.setFromEuler(eulerRotation); // Set quaternion from Euler angles
-                cubeRef.current.quaternion.multiplyQuaternions(quaternion, cubeRef.current.quaternion); // Apply rotation
+                const quaternion = new THREE.Quaternion();
+                quaternion.setFromEuler(eulerRotation); // Convert Euler angles to quaternion
+                cubeRef.current.quaternion.multiplyQuaternions(quaternion, cubeRef.current.quaternion); // Multiply current quaternion by new rotation
             }
-            requestAnimationFrame(updateRotation); // Loop the animation frame
+            requestAnimationFrame(updateRotation);
         };
-        window.addEventListener('keydown', handleKeyDown); // Add keydown listener
-        window.addEventListener('keyup', handleKeyUp); // Add keyup listener
-        requestAnimationFrame(updateRotation); // Start the rotation update loop
-        return () => { // Cleanup on unmount
-            window.removeEventListener('keydown', handleKeyDown); // Remove keydown listener
-            window.removeEventListener('keyup', handleKeyUp); // Remove keyup listener
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        requestAnimationFrame(updateRotation);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
         };
-    }, []); // Empty dependency array - runs once on mount
+    }, []);
 
-    // Automatic rotation when spinToggle is enabled
+    // Manage automatic cube rotation
     useEffect(() => {
-        if (spinToggle && !isDragged) { // Only rotate if spin is toggled and not dragging
-            const interval = setInterval(() => { // Set interval for continuous rotation
-                if (cubeRef.current) { // Check if cube ref is available
-                    cubeRef.current.rotation.x += rotationSpeed; // Increment X rotation
-                    cubeRef.current.rotation.y += rotationSpeed; // Increment Y rotation
+        if (spinToggle && !isDragged) {
+            const interval = setInterval(() => {
+                if (cubeRef.current) {
+                    cubeRef.current.rotation.x += rotationSpeed; // Add rotationSpeed to X rotation
+                    cubeRef.current.rotation.y += rotationSpeed; // Add rotationSpeed to Y rotation
                 }
-            }, 16); // ~60 FPS update rate
-            return () => clearInterval(interval); // Cleanup interval on unmount or dependency change
+            }, 16); // Approximately 60 FPS
+            return () => clearInterval(interval);
         }
-    }, [spinToggle, isDragged, rotationSpeed]); // Dependencies for re-running effect
+    }, [spinToggle, isDragged, rotationSpeed]);
 
-    // Mouse drag logic for manual rotation
+    // Handle mouse drag for manual cube rotation
     useEffect(() => {
-        if (isDragged) { // Add listeners only when dragging
-            window.addEventListener('mousemove', handlePointerMove); // Listen for mouse movement
-            window.addEventListener('mouseup', handlePointerUp); // Listen for mouse release
-        } else { // Remove listeners when not dragging
-            window.removeEventListener('mousemove', handlePointerMove); // Stop listening for movement
-            window.removeEventListener('mouseup', handlePointerUp); // Stop listening for release
+        if (isDragged) {
+            window.addEventListener('mousemove', handlePointerMove);
+            window.addEventListener('mouseup', handlePointerUp);
+        } else {
+            window.removeEventListener('mousemove', handlePointerMove);
+            window.removeEventListener('mouseup', handlePointerUp);
         }
-        return () => { // Cleanup on unmount or dependency change
-            window.removeEventListener('mousemove', handlePointerMove); // Remove movement listener
-            window.removeEventListener('mouseup', handlePointerUp); // Remove release listener
+        return () => {
+            window.removeEventListener('mousemove', handlePointerMove);
+            window.removeEventListener('mouseup', handlePointerUp);
         };
-    }, [isDragged]); // Dependency on drag state
+    }, [isDragged]);
 
-    const handlePointerDown = (event) => { // Start dragging on mouse down
-        setIsDragged(true); // Set dragging state to true
-        setLastMousePos({ x: event.clientX, y: event.clientY }); // Store initial mouse position
-        setSpinToggle(false); // Disable auto-rotation during drag
+    const handlePointerDown = (event) => {
+        setIsDragged(true);
+        setLastMousePos({ x: event.clientX, y: event.clientY });
+        setSpinToggle(false);
     };
 
-    const handlePointerMove = (event) => { // Handle mouse movement during drag
-        if (isDragged && lastMousePos) { // Only proceed if dragging and last position exists
-            const { innerWidth, innerHeight } = window; // Get window dimensions
-            const deltaX = event.movementX * 1.5 / innerWidth; // Normalize X movement
-            const deltaY = event.movementY * 1.5 / innerHeight; // Normalize Y movement
-            if (cubeRef.current) { // Check if cube ref is available
-                const eulerRotation = new THREE.Euler(deltaY * Math.PI, deltaX * Math.PI, 0, 'XYZ'); // Create Euler rotation
-                const quaternion = new THREE.Quaternion(); // Create quaternion for rotation
-                quaternion.setFromEuler(eulerRotation); // Set quaternion from Euler
-                cubeRef.current.quaternion.multiplyQuaternions(quaternion, cubeRef.current.quaternion); // Apply rotation
+    const handlePointerMove = (event) => {
+        if (isDragged && lastMousePos) {
+            const { innerWidth, innerHeight } = window;
+            const deltaX = event.movementX * 1.5 / innerWidth; // Multiply movement by 1.5 and normalize by window width
+            const deltaY = event.movementY * 1.5 / innerHeight; // Multiply movement by 1.5 and normalize by window height
+            if (cubeRef.current) {
+                const eulerRotation = new THREE.Euler(
+                    deltaY * Math.PI, // Scale deltaY by π for full rotation range
+                    deltaX * Math.PI, // Scale deltaX by π for full rotation range
+                    0, // No Z rotation
+                    'XYZ' // Apply rotations in X, Y, Z order
+                );
+                const quaternion = new THREE.Quaternion();
+                quaternion.setFromEuler(eulerRotation); // Convert Euler to quaternion
+                cubeRef.current.quaternion.multiplyQuaternions(quaternion, cubeRef.current.quaternion); // Multiply current quaternion by new rotation
             }
-            setLastMousePos({ x: event.clientX, y: event.clientY }); // Update last mouse position
+            setLastMousePos({ x: event.clientX, y: event.clientY });
         }
     };
 
-    const handlePointerUp = () => setIsDragged(false); // Stop dragging on mouse up
+    const handlePointerUp = () => setIsDragged(false);
 
-    // Define the end point for the SmallCube (matches WrappingLine's last point)
-    const endPoint = new THREE.Vector3(0, 0, -1.25); // Center of the back face for small cube placement
+    // Define static end point for SmallCube
+    const endPoint = new THREE.Vector3(0, 0, -1.25); // Set coordinates to center of back face
 
+    // Render the cube and its child components
     return (
-        <group ref={cubeRef}> // Group all elements to rotate together
-            <mesh position={[0, 0, 0]} onPointerDown={handlePointerDown}> // Main cube mesh
-                <boxGeometry args={[2.5, 2.5, 2.5]} /> // Define cube dimensions (2.5 units per side)
-                <meshStandardMaterial // Material for the main cube
-                    color={spinToggle ? 'hotpink' : 'white'} // Change color based on spin state
-                    transparent={true} // Enable transparency
-                    opacity={0.7} // Set partial transparency
+        <group ref={cubeRef}>
+            <mesh position={[0, 0, 0]} onPointerDown={handlePointerDown}>
+                <boxGeometry args={[2.5, 2.5, 2.5]} /> // 2.5 units width, height, depth
+                <meshStandardMaterial
+                    color={spinToggle ? 'hotpink' : 'white'}
+                    transparent={true}
+                    opacity={0.7}
                 />
             </mesh>
-            <CubeLines /> // Add wireframe lines to the cube
-            <WrappingLine /> // Add the wrapping line across faces
-            <MovingPoint fuseActive={fuseActive} /> // Add moving point (fuse) with animation control
-            <SmallCube position={endPoint} setFuseActive={setFuseActive} /> // Add small cube at end point with fuse control
+            <CubeLines />
+            <WrappingLine />
+            <MovingPoint fuseActive={fuseActive} />
+            <SmallCube position={endPoint} setFuseActive={setFuseActive} />
             {/* TODO: Could add a reset mechanism to restart the fuse */}
         </group>
     );
 };
 
-// Component for rendering wireframe lines on cube faces
+// Render wireframe lines on the cube
 const CubeLines = () => {
-    const linesRef = useRef(); // Reference to the wireframe lines
+    const linesRef = useRef();
 
-    useEffect(() => { // Set up wireframe geometry on mount
-        if (linesRef.current) { // Check if lines ref is available
-            const geometry = new THREE.BoxGeometry(2.5, 2.5, 2.5); // Match cube dimensions
-            const edges = new THREE.EdgesGeometry(geometry); // Create edges from geometry
-            linesRef.current.geometry = edges; // Assign edges to line segments
+    // Setup wireframe geometry
+    useEffect(() => {
+        if (linesRef.current) {
+            const geometry = new THREE.BoxGeometry(2.5, 2.5, 2.5); // 2.5 units width, height, depth
+            const edges = new THREE.EdgesGeometry(geometry);
+            linesRef.current.geometry = edges;
         }
-    }, []); // Empty dependency array - runs once on mount
+    }, []);
 
     return (
-        <lineSegments ref={linesRef}> // Render wireframe as line segments
-            <lineBasicMaterial // Material for wireframe lines
-                attach="material" // Attach to line segments
-                color="black" // Set line color
-                linewidth={2} // Set line thickness
+        <lineSegments ref={linesRef}>
+            <lineBasicMaterial
+                attach="material"
+                color="black"
+                linewidth={2}
             />
         </lineSegments>
     );
 };
 
-// Component for a line that wraps around multiple faces
+// Create a line wrapping around the cube
 const WrappingLine = () => {
-    const lineRef = useRef(); // Reference to the wrapping line
+    const lineRef = useRef();
 
-    useEffect(() => { // Set up line geometry on mount
-        if (lineRef.current) { // Check if line ref is available
-            const points = [ // Define points for the wrapping line path
-                new THREE.Vector3(-1.25, -1.25, 1.25), // Front face bottom-left
-                new THREE.Vector3(1.25, 1.25, 1.25),   // Front face top-right
-                new THREE.Vector3(1.25, 1.25, -1.25),  // Back face top-right
-                new THREE.Vector3(0, 0, -1.25)         // Center of the back face
+    // Setup line geometry with fixed points
+    useEffect(() => {
+        if (lineRef.current) {
+            const points = [
+                new THREE.Vector3(-1.25, -1.25, 1.25), // -1.25 = half of -2.5 (cube edge)
+                new THREE.Vector3(1.25, 1.25, 1.25),   // 1.25 = half of 2.5 (cube edge)
+                new THREE.Vector3(1.25, 1.25, -1.25),  // Transition to back face
+                new THREE.Vector3(0, 0, -1.25)         // Center of back face
             ];
-            const geometry = new THREE.BufferGeometry().setFromPoints(points); // Create geometry from points
-            lineRef.current.geometry = geometry; // Assign geometry to the line
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            lineRef.current.geometry = geometry;
         }
-    }, []); // Empty dependency array - runs once on mount
+    }, []);
 
     return (
-        <line ref={lineRef}> // Render the wrapping line
-            <lineBasicMaterial // Material for the wrapping line
-                attach="material" // Attach to line
-                color="red" // Set line color
-                linewidth={3} // Set line thickness
+        <line ref={lineRef}>
+            <lineBasicMaterial
+                attach="material"
+                color="red"
+                linewidth={3}
             />
         </line>
     );
     // TODO: modularize this so that we can create random straight paths
 };
 
-// Component for a point moving along the wrapping line
+// Animate a point moving along the wrapping line
 const MovingPoint = ({ fuseActive }) => {
-    const pointRef = useRef(); // Reference to the moving point mesh
-    const [t, setT] = useState(0); // Parametric parameter from 0 to 1 for animation
+    const pointRef = useRef();
+    const [t, setT] = useState(0); // Parametric t from 0 to 1
 
-    const points = [ // Define points for the fuse path (duplicates WrappingLine)
-        new THREE.Vector3(-1.25, -1.25, 1.25), // Start: Front face bottom-left
-        new THREE.Vector3(1.25, 1.25, 1.25),   // Front face top-right
-        new THREE.Vector3(1.25, 1.25, -1.25),  // Back face top-right
-        new THREE.Vector3(0, 0, -1.25)         // End: Center of the back face
+    const points = [
+        new THREE.Vector3(-1.25, -1.25, 1.25), // -1.25 = half of -2.5 (cube edge)
+        new THREE.Vector3(1.25, 1.25, 1.25),   // 1.25 = half of 2.5 (cube edge)
+        new THREE.Vector3(1.25, 1.25, -1.25),  // Transition to back face
+        new THREE.Vector3(0, 0, -1.25)         // Center of back face
     ];
     // FIXME: we need to create a parameter for taking in a points array, otherwise we'll be duplicating lines everywhere
 
-    // Animation using useFrame, only if fuse is active
-    useFrame(() => { // Update position every frame
-        if (pointRef.current && fuseActive) { // Only animate if ref exists and fuse is active
-            setT((prev) => (prev + 0.005) % 1); // Increment t and loop from 0 to 1
+    // Animate the point’s position
+    useFrame(() => {
+        if (pointRef.current && fuseActive) {
+            setT((prev) => (prev + 0.005) % 1); // Add 0.005 to t, modulo 1 to loop
 
-            const segmentCount = points.length - 1; // Number of segments (3)
-            const segmentIndex = Math.floor(t * segmentCount); // Determine current segment
-            const segmentT = (t * segmentCount) % 1; // Local t within segment (0 to 1)
+            const segmentCount = points.length - 1; // 4 points - 1 = 3 segments
+            const segmentIndex = Math.floor(t * segmentCount); // t * 3, floor to get segment (0, 1, or 2)
+            const segmentT = (t * segmentCount) % 1; // t * 3 modulo 1 for local segment progress
 
-            const startPoint = points[segmentIndex]; // Get start point of current segment
-            const endPoint = points[Math.min(segmentIndex + 1, points.length - 1)]; // Get end point
+            const startPoint = points[segmentIndex];
+            const endPoint = points[Math.min(segmentIndex + 1, points.length - 1)]; // Ensure index doesn’t exceed array
 
-            const position = new THREE.Vector3() // Calculate position using parametric equation
-                .copy(startPoint) // Start at segment’s start point
-                .lerp(endPoint, segmentT); // Interpolate to end point based on t
+            const position = new THREE.Vector3()
+                .copy(startPoint)
+                .lerp(endPoint, segmentT); // Linear interpolation: start + (end - start) * segmentT
 
-            pointRef.current.position.copy(position); // Update point’s position
+            pointRef.current.position.copy(position);
         }
     });
     // TODO: What do different easing styles look like here?
 
     return (
-        <mesh ref={pointRef}> // Render the moving point as a sphere
-            <sphereGeometry args={[0.1, 32, 32]} /> // Small sphere with radius 0.1
-            <meshStandardMaterial color="yellow" /> // Yellow material for visibility
+        <mesh ref={pointRef}>
+            <sphereGeometry args={[0.1, 32, 32]} /> // Radius 0.1, 32 segments for smoothness
+            <meshStandardMaterial color="yellow" />
         </mesh>
     );
 };
 
-// Component for a small cube centered at a given position
+// Create a clickable small cube to stop the fuse
 const SmallCube = ({ position, setFuseActive }) => {
-    const cubeRef = useRef(); // Reference to the small cube mesh
+    const cubeRef = useRef();
 
-    useEffect(() => { // Update position when prop changes
-        if (cubeRef.current && position) { // Check if ref and position are available
-            cubeRef.current.position.copy(position); // Set cube position to prop value
+    // Update small cube position
+    useEffect(() => {
+        if (cubeRef.current && position) {
+            cubeRef.current.position.copy(position);
         }
-    }, [position]); // Dependency on position prop
+    }, [position]);
 
-    // Handle click to stop the fuse
-    const handleClick = () => { // Function to stop fuse animation on click
-        setFuseActive(false); // Set fuseActive to false to halt MovingPoint
+    const handleClick = () => {
+        setFuseActive(false);
     };
 
     return (
-        <mesh ref={cubeRef} onClick={handleClick}> // Render small cube with click handler
-            <boxGeometry args={[0.2, 0.2, 0.2]} /> // Small cube with 0.2 units per side
-            <meshStandardMaterial color="red" /> // Red material for visibility
+        <mesh ref={cubeRef} onClick={handleClick}>
+            <boxGeometry args={[0.2, 0.2, 0.2]} /> // 0.2 units width, height, depth
+            <meshStandardMaterial color="red" />
         </mesh>
     );
     // TODO: Small size makes it hard to click - consider increasing size or adding a visual cue
 };
 
-// Main scene component
+// Main scene setup with canvas and lighting
 const Scene = () => {
-    const defaultRotationSpeed = 0.05; // Default speed for auto-rotation
-    const [spinToggle, setSpinToggle] = useState(false); // State to toggle auto-rotation
-    const [rotationSpeed, setRotationSpeed] = useState(defaultRotationSpeed); // State for rotation speed
+    const defaultRotationSpeed = 0.05;
+    const [spinToggle, setSpinToggle] = useState(false);
+    const [rotationSpeed, setRotationSpeed] = useState(defaultRotationSpeed);
 
-    useEffect(() => { // Handle keyboard inputs for scene controls
-        const handleKeyPress = (event) => { // Process key presses
-            if (event.key.toLowerCase() === 'r') { // Toggle rotation with 'r'
-                setSpinToggle((prev) => !prev); // Invert spin state
-            } else if (event.key === '1') { // Increase speed with '1'
-                setRotationSpeed((prev) => prev + 0.02); // Increment speed
-            } else if (event.key === '2') { // Decrease speed with '2'
-                setRotationSpeed((prev) => prev - 0.02); // Decrement speed
+    // Handle keyboard controls for rotation speed and toggle
+    useEffect(() => {
+        const handleKeyPress = (event) => {
+            if (event.key.toLowerCase() === 'r') {
+                setSpinToggle((prev) => !prev);
+            } else if (event.key === '1') {
+                setRotationSpeed((prev) => prev + 0.02); // Add 0.02 to current speed
+            } else if (event.key === '2') {
+                setRotationSpeed((prev) => prev - 0.02); // Subtract 0.02 from current speed
             }
         };
-        window.addEventListener('keydown', handleKeyPress); // Add keydown listener
-        return () => window.removeEventListener('keydown', handleKeyPress); // Cleanup on unmount
-    }, []); // Empty dependency array - runs once on mount
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, []);
 
     return (
-        <Canvas // Render the 3D canvas
-            style={{ height: '70vh', width: '100%', display: 'block' }} // Set canvas dimensions and style
-            camera={{ position: [0, 0, 5] }} // Position camera 5 units away on Z axis
+        <Canvas
+            style={{ height: '70vh', width: '100%', display: 'block' }}
+            camera={{ position: [0, 0, 5] }} // Camera at 5 units on Z axis
         >
-            <ambientLight intensity={0.5} /> // Add soft ambient lighting
-            <directionalLight position={[10, 15, 5]} intensity={5} /> // Add directional light source
-            <Cube // Render the Cube component
-                spinToggle={spinToggle} // Pass auto-rotation state
-                rotationSpeed={rotationSpeed} // Pass rotation speed
-                setSpinToggle={setSpinToggle} // Pass setter for spin toggle
+            <ambientLight intensity={0.5} />
+            <directionalLight position={[10, 15, 5]} intensity={5} />
+            <Cube
+                spinToggle={spinToggle}
+                rotationSpeed={rotationSpeed}
+                setSpinToggle={setSpinToggle}
             />
         </Canvas>
     );
