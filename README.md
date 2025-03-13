@@ -1,106 +1,87 @@
 # **HoldFast**  
 
 ## **Overview**  
-*Brief description of the application.*  
+HoldFast is a group project for **Computer Graphics CS4053**. Players race to tap buttons on a rotating cube before a burning fuse reaches its end. The game features real-time animations, particle effects, and cel-shading. Players lose if the cube "explodes" when the wire burns up.
 
----
+## **Current Features**  
+- **Wire System:** Connected line segments drawn in object space, wrapping around the cube.  
+- **Fuse Animation:** A moving fuse mesh traverses the wire using a parametric equation.  
+- **Interactive Buttons:** Clickable meshes allow players to stop the fuse.  
+- **Cel-Shading & Wireframes:** Implements cel-shading similar to the connected line segments.  
 
+## **Next Objectives**  
+- **Improve Input Handling:** Prevent click-through interactions.  
+- **Code Modularization:** Enhance flexibility for future feature development.  
+- **UI & Game Loop Enhancements:** Introduce a timer and background shaders.
+   - We should implement a simple menu UI for starting the interaction. 
+- **Advanced Cel-Shading:** Further refine shader materials in **Three.js** ([ShaderMaterial Docs](https://threejs.org/docs/#api/en/materials/ShaderMaterial)).  
+- **Wire Burn Effect:** Recolor or remove parts of the wire as the fuse burns.  
+
+---  
 ## **Installation & Setup**  
-
 ### **Prerequisites**  
-Ensure you have the required dependencies installed before proceeding.  
+Ensure the required dependencies are installed.  
 
-### **Steps to Set Up**  
+### **Setup Steps**  
+1. **Clone the Repository:**  
+   ```sh
+   git clone git@github.com:ephraaimwong/HoldFast.git
+   ```  
+   Alternatively, use [GitHub Desktop](https://docs.github.com/en/desktop/adding-and-cloning-repositories/cloning-a-repository-from-github-to-github-desktop).  
 
-1. **Clone this repository:**  
-   - **Using Terminal (SSH):**  
-     ```sh
-     git clone git@github.com:ephraaimwong/HoldFast.git
-     ```  
-   - **Using [GitHub Desktop](https://docs.github.com/en/desktop/adding-and-cloning-repositories/cloning-a-repository-from-github-to-github-desktop)**  
+2. **Install Dependencies:**  
+   ```sh
+   node -v  # Check Node.js version  
+   npm -v   # Check npm version  
+   npm install  
+   ```  
+   Ensure the following dependencies are in `package.json`:  
+   ```json
+   "dependencies": {
+     "@react-three/drei": "^10.0.4",
+     "@react-three/fiber": "^9.0.4",
+     "react": "^19.0.0",
+     "react-dom": "^19.0.0"
+   }
+   ```  
 
-2. **Install dependencies:**  
-   - Check for Node and npm versions:  
-     ```sh
-     node -v
-     npm -v
-     ```  
-   - Install required packages:  
-     ```sh
-     npm install react@19.0.0 react-dom@19.0.0 @react-three/fiber@9.0.4 @react-three/drei@10.0.4
-     ```  
-   - Verify installation in `package.json`:  
-     ```json
-     ...
-     "dependencies": {
-       "@react-three/drei": "^10.0.4",
-       "@react-three/fiber": "^9.0.4",
-       "react": "^19.0.0",
-       "react-dom": "^19.0.0"
-     }
-     ...
-     ```  
+3. **Set Up Environment Variables**  
+4. **Start the Application**  
+   ```sh
+   npm start
+   ```  
 
-3. **Set up environment variables**  
-
-4. **Start the application**  
-
----
-
+---  
 ## **Tech Stack**  
+- **Three.js:** Used for rendering 3D graphics.  
+- **Blender:** For creating and importing complex meshes.  
 
-- **Java**: Version a.bcd  
-- **Unity**  
-- **Blender**  
-- **OpenGL**  
-
----
-
-## **Development Standard-Operating-Procedures (SOP)**  
-
+---  
+## **Development Workflow**  
 ### **Feature-Branch Workflow**  
-
-1. **Create a new branch for every feature** (1-to-1 principle):  
-   - [GitHub Web](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-and-deleting-branches-within-your-repository)  
-   - [GitHub Desktop](https://docs.github.com/en/desktop/making-changes-in-a-branch/managing-branches-in-github-desktop)  
-   - [Terminal](https://www.atlassian.com/git/tutorials/using-branches)  
-
-2. **Branch naming convention:**  
-   ```
-   <type>/<featureName>
-   ```
-   - Example:  
-     - `feature/buttonSpawn`  
-     - `bugfix/buttonSpawnIssue`  
-
-3. **Always create a branch from the latest `main` branch.**  
-
-4. **Regularly fetch updates from `main`:**  
+1. **Create a new branch per feature:**  
+   ```sh
+   git checkout -b feature/buttonSpawn
+   ```  
+2. **Branch Naming Convention:**  
+   - `feature/<featureName>` (e.g., `feature/buttonSpawn`)  
+   - `bugfix/<fixName>` (e.g., `bugfix/clickIssue`)  
+3. **Regularly fetch updates from `main`:**  
    ```sh
    git fetch
-   ```
+   ```  
+4. **Merge via Pull Requests:**  
+   - Submit a PR before merging into `main`.  
+   - Follow team-approved merge methods.  
 
-### **Merging Guidelines**  
-
-1. **Always create a pull request before merging into `main`:**  
-   - [GitHub Web](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/merging-a-pull-request)  
-   - [GitHub Desktop](https://docs.github.com/en/desktop/working-with-your-remote-repository-on-github-or-github-enterprise/syncing-your-branch-in-github-desktop#merging-another-branch-into-your-project-branch)  
-   - [Terminal](https://www.atlassian.com/git/tutorials/using-branches/git-merge)  
-
-2. **Merge using the appropriate method** based on team guidelines.  
-
----
-
+---  
 ## **Team Communication**  
+- **Primary Channel:** [Telegram](https://telegram.org/)  
+- **Weekly Check-Ins**  
 
-1. **Primary communication channel:** [Telegram](https://telegram.org/)  
-2. **Weekly team check-ins**  
-3. **[Method]** for progress tracking  
-
----
-
+---  
 ## **Additional Notes**  
+- Follow the **Contributing Guidelines** before making changes.  
+- Refer to the **Documentation** for API details.  
+- For critical issues, contact **[person of contact]**.  
 
-- Follow the **Contributing Guidelines** when making changes.  
-- Refer to the **Documentation** for detailed API references.  
-- Contact **[person of contact]** for any critical issues.  
