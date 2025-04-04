@@ -114,11 +114,11 @@ const Cube = ({ spinToggle, setSpinToggle, rotationSpeed }) => {
 
     // Render the cube and its child components
     return (
-        <group ref={cubeRef}>
+        <group ref={cubeRef} position={[0, 1.250, 0]}>
             <mesh position={[0, 0, 0]} onPointerDown={handlePointerDown}>
                 <boxGeometry args={[2.5, 2.5, 2.5]} /> // 2.5 units width, height, depth
                 <meshStandardMaterial
-                    color={spinToggle ? 'hotpink' : 'white'}
+                    color={spinToggle ? 'hotpink' : 'blue'}
                     transparent={true}
                     opacity={0.7}
                 />
@@ -190,6 +190,7 @@ const WrappingLine = () => {
 const MovingPoint = ({ fuseActive }) => {
     const pointRef = useRef();
     const [t, setT] = useState(0); // Parametric t from 0 to 1
+    const trail = useRef([]);
 
     const points = [
         new THREE.Vector3(-1.25, -1.25, 1.25), // -1.25 = half of -2.5 (cube edge)
@@ -200,7 +201,8 @@ const MovingPoint = ({ fuseActive }) => {
     // FIXME: we need to create a parameter for taking in a points array, otherwise we'll be duplicating lines everywhere
 
     // Animate the point’s position
-    useFrame(() => {
+    useFrame(({ clock }) => {
+        const time = clock.getElapsedTime();
         if (pointRef.current && fuseActive) {
             setT((prev) => (prev + 0.005) % 1); // Add 0.005 to t, modulo 1 to loop
 
@@ -216,17 +218,46 @@ const MovingPoint = ({ fuseActive }) => {
                 .lerp(endPoint, segmentT); // Linear interpolation: start + (end - start) * segmentT
 
             pointRef.current.position.copy(position);
+
+            // Spark flicker
+      const flicker = 0.8 + Math.sin(time * 20 + t * 10) * 0.2;
+      pointRef.current.scale.set(flicker, flicker, flicker);
+      pointRef.current.material.emissiveIntensity = 2 + Math.sin(time * 30) * 1;
+      pointRef.current.material.opacity = 0.5 + Math.random() * 0.3;
         }
     });
     // TODO: What do different easing styles look like here?
 
     return (
-        <mesh ref={pointRef}>
-            <sphereGeometry args={[0.1, 32, 32]} /> // Radius 0.1, 32 segments for smoothness
-            <meshStandardMaterial color="yellow" />
-        </mesh>
-    );
-};
+        <>
+          {/* Main Spark */}
+          <mesh ref={pointRef}>
+            <sphereGeometry args={[0.1, 16, 16]} />
+            <meshStandardMaterial
+              color="yellow"
+              emissive="yellow"
+              emissiveIntensity={2}
+              transparent
+              opacity={0.7}
+            />
+          </mesh>
+    
+          {/* Trailing sparks */}
+          {trail.current.map((entry, i) => (
+            <mesh key={i} position={entry.position}>
+              <sphereGeometry args={[0.08 - i * 0.005, 12, 12]} />
+              <meshStandardMaterial
+                color="orange"
+                emissive="orange"
+                emissiveIntensity={1.5 - i * 0.1}
+                transparent
+                opacity={0.4 - i * 0.03}
+              />
+            </mesh>
+          ))}
+        </>
+      );
+    };
 
 // Create a clickable small cube to stop the fuse
 const SmallCube = ({ position, setFuseActive }) => {
@@ -252,41 +283,75 @@ const SmallCube = ({ position, setFuseActive }) => {
     // TODO: Small size makes it hard to click - consider increasing size or adding a visual cue
 };
 
-// Main scene setup with canvas and lighting
+// // Main scene setup with canvas and lighting
+// const Scene = () => {
+//     const defaultRotationSpeed = 0.05;
+//     const [spinToggle, setSpinToggle] = useState(false);
+//     const [rotationSpeed, setRotationSpeed] = useState(defaultRotationSpeed);
+
+//     // Handle keyboard controls for rotation speed and toggle
+//     useEffect(() => {
+//         const handleKeyPress = (event) => {
+//             if (event.key.toLowerCase() === 'r') {
+//                 setSpinToggle((prev) => !prev);
+//             } else if (event.key === '1') {
+//                 setRotationSpeed((prev) => prev + 0.02); // Add 0.02 to current speed
+//             } else if (event.key === '2') {
+//                 setRotationSpeed((prev) => prev - 0.02); // Subtract 0.02 from current speed
+//             }
+//         };
+//         window.addEventListener('keydown', handleKeyPress);
+//         return () => window.removeEventListener('keydown', handleKeyPress);
+//     }, []);
+
+//     return (
+//         <Canvas
+//             style={{ height: '70vh', width: '100%', display: 'block' }}
+//             camera={{ position: [0, 0, 5] }} // Camera at 5 units on Z axis
+//         >
+//             <ambientLight intensity={0.5} />
+//             <directionalLight position={[10, 15, 5]} intensity={5} />
+//             <Cube
+//                 spinToggle={spinToggle}
+//                 rotationSpeed={rotationSpeed}
+//                 setSpinToggle={setSpinToggle}
+//             />
+//         </Canvas>
+//     );
+// };
+
+//export default Scene; // Export Scene as default export
+
 const Scene = () => {
     const defaultRotationSpeed = 0.05;
     const [spinToggle, setSpinToggle] = useState(false);
     const [rotationSpeed, setRotationSpeed] = useState(defaultRotationSpeed);
-
-    // Handle keyboard controls for rotation speed and toggle
+  
     useEffect(() => {
-        const handleKeyPress = (event) => {
-            if (event.key.toLowerCase() === 'r') {
-                setSpinToggle((prev) => !prev);
-            } else if (event.key === '1') {
-                setRotationSpeed((prev) => prev + 0.02); // Add 0.02 to current speed
-            } else if (event.key === '2') {
-                setRotationSpeed((prev) => prev - 0.02); // Subtract 0.02 from current speed
-            }
-        };
-        window.addEventListener('keydown', handleKeyPress);
-        return () => window.removeEventListener('keydown', handleKeyPress);
+      const handleKeyPress = (event) => {
+        if (event.key.toLowerCase() === 'r') {
+          setSpinToggle((prev) => !prev);
+        } else if (event.key === '1') {
+          setRotationSpeed((prev) => prev + 0.02);
+        } else if (event.key === '2') {
+          setRotationSpeed((prev) => prev - 0.02);
+        }
+      };
+      window.addEventListener('keydown', handleKeyPress);
+      return () => window.removeEventListener('keydown', handleKeyPress);
     }, []);
-
+  
     return (
-        <Canvas
-            style={{ height: '70vh', width: '100%', display: 'block' }}
-            camera={{ position: [0, 0, 5] }} // Camera at 5 units on Z axis
-        >
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 15, 5]} intensity={5} />
-            <Cube
-                spinToggle={spinToggle}
-                rotationSpeed={rotationSpeed}
-                setSpinToggle={setSpinToggle}
-            />
-        </Canvas>
+      <>
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 15, 5]} intensity={5} />
+        <Cube
+          spinToggle={spinToggle}
+          rotationSpeed={rotationSpeed}
+          setSpinToggle={setSpinToggle}
+        />
+      </>
     );
-};
-
-export default Scene; // Export Scene as default export
+  };
+  
+  export default Scene;
