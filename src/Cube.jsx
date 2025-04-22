@@ -308,7 +308,7 @@ const SmallCube = ({ position, setFuseActive }) => {
     // TODO: Small size makes it hard to click - consider increasing size or adding a visual cue 
 };
 
-const Scene = () => {
+const Scene = ({showGridHelper, showAxesHelper}) => {
     const [pos, setPos] = useState([10, 10, 10]);
     const controlsRef = useRef();
     const activeKeys = useRef(new Set());
@@ -414,9 +414,9 @@ const Scene = () => {
                 <meshStandardMaterial color="white" roughness={0.5} metalness={0.2} />
             </mesh>
 
-            {/* grids for debugging and testing */}
-            {/* <gridHelper args={[50, 50, '#ffffff', '#444444']} />
-            <axesHelper args={[10]} /> */}
+            {/* helpers, toggleable */}
+            {showGridHelper && <gridHelper args={[30, 30, '#ffffff', '#444444']} position = {[0,-2,0]} />}
+            {showAxesHelper && <axesHelper args={[10]} position = {[0,-1,0]}/>}
             
             {/* Scene gets orbits controls on intitalization, disabled when cube dragged */}
             <OrbitControls ref={controlsRef} />
