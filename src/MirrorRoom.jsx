@@ -20,7 +20,11 @@ export default function MirrorRoom({setControlsRef}) {
   }, [setControlsRef]);
 
 
-  const roomSize = 200;
+  // const roomSize = 200;
+  // const halfRoom = roomSize / 2;
+
+  // resize for testing
+  const roomSize = 80;
   const halfRoom = roomSize / 2;
 
   const particles = useMemo(() => {
@@ -34,18 +38,6 @@ export default function MirrorRoom({setControlsRef}) {
     return temp;
   }, []);
 
-  // // added by ephraim
-  // const handlePointerDown = (e) => {
-  //   // Only enable orbit controls if we're not clicking the cube
-  //   if (!e.object.userData.isCube) {
-  //     setIsDragging(true);
-  //     e.stopPropagation(); // Prevent event from reaching the cube
-  //   }
-  // };
-  // //added by ephraim
-  // const handlePointerUp = () => {
-  //   setIsDragging(false);
-  // };
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
@@ -61,90 +53,70 @@ export default function MirrorRoom({setControlsRef}) {
 
   return (
     <>
-      <EffectComposer>
+    {/* turn off when debugging */}
+      {/* <EffectComposer>
         <Bloom luminanceThreshold={0.1} luminanceSmoothing={0.9} height={300} intensity={1.2} />
-      </EffectComposer>
+      </EffectComposer> */}
 
-      {/* added by ephraim
-      <group 
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
-        onPointerMissed={handlePointerUp}
-      > */}
-
-      <OrbitControls
-
-        target={[0, 0, 0]}
-        minDistance={2}
-        maxDistance={300}
-        enableRotate
-        enablePan
-        // // added by ephraim
-        // enableRotate={isDragging}
-        // enablePan={isDragging}
-        // enabled={isDragging}
-        // enabled = {false}
-        ref={controlsRef}
-        
-      />
+      {/* Orbit Controls moved to Scene for better handling */}
       
-
       <color attach="background" args={['#000']} />
       <fog attach="fog" args={['#111111', 50, 400]} />
 
-      <ambientLight intensity={0.5} />
+      {/* lowered ambient for better spotlight pop */}
+      <ambientLight intensity={0.1} /> 
       <pointLight position={[0, 40, 0]} intensity={3} color="#ff66ff" />
       <pointLight position={[80, 0, 80]} intensity={1.5} color="#66ffff" />
       <pointLight position={[-80, 0, -80]} intensity={1.5} color="#ffcc66" />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -halfRoom / 2, 0]} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -halfRoom / 2, 0]} pointerEvents="none">
         <planeGeometry args={[roomSize, roomSize]} />
         <MeshReflectorMaterial blur={[600, 200]} resolution={2048} mixBlur={1} mixStrength={1.5}
           roughness={0.2} depthScale={2} minDepthThreshold={0.3} maxDepthThreshold={1.5} color="#111" metalness={1} />
       </mesh>
 
-      <mesh position={[0, 0, -halfRoom]} receiveShadow>
+      <mesh position={[0, 0, -halfRoom]} pointerEvents="none">
         <planeGeometry args={[roomSize, roomSize]} />
         <MeshReflectorMaterial blur={[300, 100]} resolution={1024} mixBlur={1} mixStrength={2}
           roughness={0.4} depthScale={1} color="#888" metalness={0.9} />
       </mesh>
 
-      <mesh ref={leftWallRef} position={[-halfRoom, 0, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
+      <mesh ref={leftWallRef} position={[-halfRoom, 0, 0]} rotation={[0, Math.PI / 2, 0]} pointerEvents="none" >
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial />
       </mesh>
 
-      <mesh ref={rightWallRef} position={[halfRoom, 0, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
+      <mesh ref={rightWallRef} position={[halfRoom, 0, 0]} rotation={[0, -Math.PI / 2, 0]} pointerEvents="none">
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial />
       </mesh>
 
-      <mesh position={[0, halfRoom / 2, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
+      <mesh position={[0, halfRoom / 2, 0]} rotation={[Math.PI / 2, 0, 0]} pointerEvents="none">
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial color="#222" />
       </mesh>
 
-      <mesh ref={ceilingDiscRef} position={[0, halfRoom / 2 - 1, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
-        <circleGeometry args={[30, 64]} />
+      <mesh ref={ceilingDiscRef} position={[0, halfRoom / 2 - 1, 0]} rotation={[Math.PI / 2, 0, 0]} pointerEvents="none">\
+        {/* changed disc size to scale with room */}
+        <circleGeometry args={[roomSize/8, roomSize/5]} />
         <meshStandardMaterial color="white" emissive="#ff00ff" emissiveIntensity={1.5} />
       </mesh>
 
-      <mesh position={[0, 0, halfRoom]} rotation={[0, Math.PI, 0]} receiveShadow>
+      <mesh position={[0, 0, halfRoom]} rotation={[0, Math.PI, 0]} pointerEvents="none">
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial color="#666" transparent opacity={0.2} />
       </mesh>
 
 
       {particles.map((pos, i) => (
-        <mesh key={i} position={pos} castShadow receiveShadow>
+        <mesh key={i} position={pos} pointerEvents="none">
           <sphereGeometry args={[0.1, 8, 8]} />
           <meshStandardMaterial emissive="#ffffff" emissiveIntensity={2} transparent opacity={0.5} />
         </mesh>
       ))}
 
-      <Stars radius={200} depth={60} count={5000} factor={7} saturation={0} fade />
-
-      {/* </group> */}
+      {/* lowered stars count for my computer's sanity */}
+      <Stars radius={200} depth={60} count={1000} factor={7} saturation={0} fade />
     </>
     
   );

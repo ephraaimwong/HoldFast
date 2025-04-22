@@ -1,9 +1,13 @@
 import { Canvas } from '@react-three/fiber';
 import './App.css';
 import Scene from './Cube';
+import MirrorRoom from './MirrorRoom';
 import * as THREE from 'three';
+import {useRef} from 'react';
+
 
 function App() {
+    const controlsRef = useRef();
     return (
         <>
             <Canvas
@@ -19,8 +23,8 @@ function App() {
                 shadows
                 gl={{ antialias: true, shadowMapType: THREE.PCFSoftShadowMap }}
             >
-              {/* <MirrorRoom/> */}
-              <Scene />
+              <MirrorRoom setControlsRef={(ref)=>(controlsRef.current = ref)}/>
+              <Scene controlsRef={controlsRef}/>
             </Canvas>
 
             <div
