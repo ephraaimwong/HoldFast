@@ -4,7 +4,11 @@ import './App.css';
 import MirrorRoom from './MirrorRoom';
 import Scene from './Cube';
 
+import { useRef } from 'react';
+
 function App() {
+  const controlsRef=useRef();
+
   return (
     <>
       <Canvas
@@ -18,8 +22,8 @@ function App() {
     zIndex: 0,
   }}
 >
-  <MirrorRoom />
-  <Scene />
+  <MirrorRoom setControlsRef={(ref)=>(controlsRef.current = ref)}/>
+  <Scene controlsRef={controlsRef}/>
 </Canvas>
 
 <div

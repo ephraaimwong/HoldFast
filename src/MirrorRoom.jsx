@@ -1,15 +1,23 @@
 
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { MeshReflectorMaterial, OrbitControls, Stars } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
-export default function MirrorRoom() {
+export default function MirrorRoom({setControlsRef}) {
   const leftWallRef = useRef();
   const rightWallRef = useRef();
   const ceilingDiscRef = useRef();
+
+  // added by ephraim
+  const controlsRef = useRef();
+  useEffect(() => {
+    if (setControlsRef && controlsRef.current) {
+      setControlsRef(controlsRef.current);
+    }
+  }, [setControlsRef]);
 
 
   const roomSize = 200;
@@ -25,6 +33,19 @@ export default function MirrorRoom() {
     }
     return temp;
   }, []);
+
+  // // added by ephraim
+  // const handlePointerDown = (e) => {
+  //   // Only enable orbit controls if we're not clicking the cube
+  //   if (!e.object.userData.isCube) {
+  //     setIsDragging(true);
+  //     e.stopPropagation(); // Prevent event from reaching the cube
+  //   }
+  // };
+  // //added by ephraim
+  // const handlePointerUp = () => {
+  //   setIsDragging(false);
+  // };
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
@@ -44,13 +65,29 @@ export default function MirrorRoom() {
         <Bloom luminanceThreshold={0.1} luminanceSmoothing={0.9} height={300} intensity={1.2} />
       </EffectComposer>
 
+      {/* added by ephraim
+      <group 
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerMissed={handlePointerUp}
+      > */}
+
       <OrbitControls
+
         target={[0, 0, 0]}
         minDistance={2}
         maxDistance={300}
         enableRotate
         enablePan
+        // // added by ephraim
+        // enableRotate={isDragging}
+        // enablePan={isDragging}
+        // enabled={isDragging}
+        // enabled = {false}
+        ref={controlsRef}
+        
       />
+      
 
       <color attach="background" args={['#000']} />
       <fog attach="fog" args={['#111111', 50, 400]} />
@@ -106,6 +143,9 @@ export default function MirrorRoom() {
       ))}
 
       <Stars radius={200} depth={60} count={5000} factor={7} saturation={0} fade />
+
+      {/* </group> */}
     </>
+    
   );
 }

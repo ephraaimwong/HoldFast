@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react'; // Import React hooks for state and side effects
 import { useFrame, Canvas } from '@react-three/fiber'; // Import React Three Fiber components for 3D rendering
 import * as THREE from 'three'; // Import Three.js core library for 3D math and objects
+import { OrbitControls } from '@react-three/drei';
 
 // Cube component manages the main cube and its interactions
-const Cube = ({ spinToggle, setSpinToggle, rotationSpeed }) => {
+const Cube = ({ spinToggle, setSpinToggle, rotationSpeed, controlsRef }) => {
     // State and ref setup for cube interactions
     const cubeRef = useRef(); // Reference to the main cube mesh for direct manipulation
     const [isDragged, setIsDragged] = useState(false); // Tracks if the cube is being dragged with the mouse
@@ -81,7 +82,14 @@ const Cube = ({ spinToggle, setSpinToggle, rotationSpeed }) => {
         };
     }, [isDragged]);
 
+    
+
     const handlePointerDown = (event) => {
+        event.stopPropagation(); // This prevents the event from reaching OrbitControls
+        // Disable OrbitControls when dragging cube
+        if (controlsRef?.current) {
+            controlsRef.current.enabled = false;
+        }
         setIsDragged(true);
         setLastMousePos({ x: event.clientX, y: event.clientY });
         setSpinToggle(false);
@@ -107,7 +115,13 @@ const Cube = ({ spinToggle, setSpinToggle, rotationSpeed }) => {
         }
     };
 
-    const handlePointerUp = () => setIsDragged(false);
+    const handlePointerUp = () => {
+        setIsDragged(false);    
+        // Re-enable OrbitControls when done dragging
+        if (controlsRef?.current) {
+          controlsRef.current.enabled = true;
+        }
+    }
 
     // Define static end point for SmallCube
     const endPoint = new THREE.Vector3(0, 0, -1.25); // Set coordinates to center of back face
@@ -322,7 +336,7 @@ const SmallCube = ({ position, setFuseActive }) => {
 
 //export default Scene; // Export Scene as default export
 
-const Scene = () => {
+const Scene = ({controlsRef}) => {
     const defaultRotationSpeed = 0.05;
     const [spinToggle, setSpinToggle] = useState(false);
     const [rotationSpeed, setRotationSpeed] = useState(defaultRotationSpeed);
@@ -349,6 +363,7 @@ const Scene = () => {
           spinToggle={spinToggle}
           rotationSpeed={rotationSpeed}
           setSpinToggle={setSpinToggle}
+          controlsRef={controlsRef}
         />
       </>
     );
