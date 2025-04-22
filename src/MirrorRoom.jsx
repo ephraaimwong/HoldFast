@@ -69,7 +69,7 @@ export default function MirrorRoom({setControlsRef}) {
       <pointLight position={[80, 0, 80]} intensity={1.5} color="#66ffff" />
       <pointLight position={[-80, 0, -80]} intensity={1.5} color="#ffcc66" />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -halfRoom / 2, 0]} pointerEvents="none">
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -halfRoom / 2, 0]} pointerEvents="none" receiveShadow castShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <MeshReflectorMaterial blur={[600, 200]} resolution={2048} mixBlur={1} mixStrength={1.5}
           roughness={0.2} depthScale={2} minDepthThreshold={0.3} maxDepthThreshold={1.5} color="#111" metalness={1} />

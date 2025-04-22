@@ -410,7 +410,7 @@ const Scene = () => {
             />
             {/*base plate for spotlight and shadow to be cast on */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow castShadow>
-                <planeGeometry args={[100, 100]} />
+                <planeGeometry args={[30, 30]} />
                 <meshStandardMaterial color="white" roughness={0.5} metalness={0.2} />
             </mesh>
 
