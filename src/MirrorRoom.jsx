@@ -97,46 +97,46 @@ export default function MirrorRoom({setControlsRef}) {
       <pointLight position={[80, 0, 80]} intensity={1.5} color="#66ffff" />
       <pointLight position={[-80, 0, -80]} intensity={1.5} color="#ffcc66" />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -halfRoom / 2, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -halfRoom / 2, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <MeshReflectorMaterial blur={[600, 200]} resolution={2048} mixBlur={1} mixStrength={1.5}
           roughness={0.2} depthScale={2} minDepthThreshold={0.3} maxDepthThreshold={1.5} color="#111" metalness={1} />
       </mesh>
 
-      <mesh position={[0, 0, -halfRoom]}>
+      <mesh position={[0, 0, -halfRoom]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <MeshReflectorMaterial blur={[300, 100]} resolution={1024} mixBlur={1} mixStrength={2}
           roughness={0.4} depthScale={1} color="#888" metalness={0.9} />
       </mesh>
 
-      <mesh ref={leftWallRef} position={[-halfRoom, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+      <mesh ref={leftWallRef} position={[-halfRoom, 0, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial />
       </mesh>
 
-      <mesh ref={rightWallRef} position={[halfRoom, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+      <mesh ref={rightWallRef} position={[halfRoom, 0, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial />
       </mesh>
 
-      <mesh position={[0, halfRoom / 2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh position={[0, halfRoom / 2, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial color="#222" />
       </mesh>
 
-      <mesh ref={ceilingDiscRef} position={[0, halfRoom / 2 - 1, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh ref={ceilingDiscRef} position={[0, halfRoom / 2 - 1, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
         <circleGeometry args={[30, 64]} />
         <meshStandardMaterial color="white" emissive="#ff00ff" emissiveIntensity={1.5} />
       </mesh>
 
-      <mesh position={[0, 0, halfRoom]} rotation={[0, Math.PI, 0]}>
+      <mesh position={[0, 0, halfRoom]} rotation={[0, Math.PI, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial color="#666" transparent opacity={0.2} />
       </mesh>
 
 
       {particles.map((pos, i) => (
-        <mesh key={i} position={pos}>
+        <mesh key={i} position={pos} castShadow receiveShadow>
           <sphereGeometry args={[0.1, 8, 8]} />
           <meshStandardMaterial emissive="#ffffff" emissiveIntensity={2} transparent opacity={0.5} />
         </mesh>
