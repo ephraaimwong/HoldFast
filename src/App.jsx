@@ -10,7 +10,7 @@ function App() {
     const [showGridHelper, setShowGridHelper] = useState(false);
     const [showAxesHelper, setShowAxesHelper] = useState(false);
     const [isGameRunning, setIsGameRunning] = useState(false);
-    const [timer, setTimer] = useState(45);
+    const [timer, setTimer] = useState(60);
     const [clickedCubes, setClickedCubes] = useState(new Set());
     const [autoRotateCamera, setAutoRotateCamera] = useState(true);
     const [showVictoryMessage, setShowVictoryMessage] = useState(false);
@@ -34,7 +34,7 @@ function App() {
 
     // Check if all cubes are clicked
     useEffect(() => {
-        if (isGameRunning && clickedCubes.size === 3) {
+        if (isGameRunning && clickedCubes.size === 6) {
             setIsGameRunning(false);
             setShowVictoryMessage(true);
             // Hide victory message after 5 seconds
@@ -61,11 +61,11 @@ function App() {
         setIsGameRunning(prev => !prev);
         setShowVictoryMessage(false);
         if (!isGameRunning) {
-            setTimer(45);
-            setClickedCubes(new Set()); // Reset clicked cubes when starting new game
-            setAutoRotateCamera(false); // Disable auto-rotation when game starts
+            setTimer(60);
+            setClickedCubes(new Set());
+            setAutoRotateCamera(false);
         } else {
-            setAutoRotateCamera(true); // Re-enable auto-rotation when game stops
+            setAutoRotateCamera(true);
         }
     };
 
@@ -151,7 +151,7 @@ function App() {
                         Timer: {formatTime(timer)}
                     </h2>
                     <p style={{ margin: '0 0 0.5rem 0' }}>
-                        Cubes clicked: {clickedCubes.size}/3
+                        Cubes clicked: {clickedCubes.size}/6
                     </p>
                     <button
                         onClick={toggleGame}

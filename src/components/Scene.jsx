@@ -6,24 +6,63 @@ import Cube from './Cube';
 const Scene = ({ controlsRef, showGridHelper, showAxesHelper, onCubeClick, isGameRunning, autoRotateCamera }) => {
     const rotationSpeed = 0.01;
 
-    // Use fixed positions for the cubes to ensure they don't overlap
+    // Use randomized positions for the cubes while ensuring no overlap
     const cubePositions = useMemo(() => {
         const roomSize = 80;
         const halfRoom = roomSize / 2;
-        const spacing = 25; // Increased spacing between cubes
+        const minSpacing = 20; // Minimum spacing between cubes
+        const maxSpacing = 35; // Maximum spacing between cubes
 
-        // Define fixed positions for each cube with more separation
+        // Helper function to get random value within range
+        const randomInRange = (min, max) => {
+            return Math.random() * (max - min) + min;
+        };
+
+        // Generate random positions while keeping cubes on different axes
         return [
-            // Left cube - positioned further left
-            new THREE.Vector3(-halfRoom + spacing, 0, -spacing),
+            // Left cube - random X position, fixed Y and Z
+            new THREE.Vector3(
+                -halfRoom + randomInRange(minSpacing, maxSpacing),
+                randomInRange(-10, 10),
+                randomInRange(-10, 10)
+            ),
 
-            // Right cube - positioned further right
-            new THREE.Vector3(halfRoom - spacing, 0, spacing),
+            // Right cube - random X position, fixed Y and Z
+            new THREE.Vector3(
+                halfRoom - randomInRange(minSpacing, maxSpacing),
+                randomInRange(-10, 10),
+                randomInRange(-10, 10)
+            ),
 
-            // Center cube - positioned in the center, higher up
-            new THREE.Vector3(0, 15, 0)
+            // Center cube - random Y position, fixed X and Z
+            new THREE.Vector3(
+                randomInRange(-10, 10),
+                randomInRange(10, 20),
+                randomInRange(-10, 10)
+            ),
+
+            // Back cube - random Z position, fixed X and Y
+            new THREE.Vector3(
+                randomInRange(-10, 10),
+                randomInRange(5, 15),
+                -halfRoom + randomInRange(minSpacing, maxSpacing)
+            ),
+
+            // Front cube - random Z position, fixed X and Y
+            new THREE.Vector3(
+                randomInRange(-10, 10),
+                randomInRange(5, 15),
+                halfRoom - randomInRange(minSpacing, maxSpacing)
+            ),
+
+            // Top cube - random Y position, fixed X and Z
+            new THREE.Vector3(
+                randomInRange(-10, 10),
+                halfRoom - randomInRange(minSpacing, maxSpacing),
+                randomInRange(-10, 10)
+            )
         ];
-    }, []);
+    }, []); // Empty dependency array means this only runs once on mount
 
     return (
         <>
