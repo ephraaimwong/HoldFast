@@ -11,9 +11,9 @@ const MovingPoint = ({ fuseActive, points, onFuseComplete }) => {
     const tRef = useRef(0); // Use ref for smoother updates
     const lastPointsRef = useRef([]); // Store the last valid points
 
-    // Generate a random movement time between 5 and 9 seconds
+    // Generate a random movement time between 10 and 15 seconds
     useEffect(() => {
-        const randomTime = 5 + Math.random() * 4; // Random time between 5 and 9 seconds
+        const randomTime = 10 + Math.random() * 5; // Random time between 10 and 15 seconds
         setMovementTime(randomTime);
     }, []);
 
