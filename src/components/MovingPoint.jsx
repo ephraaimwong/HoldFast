@@ -1,29 +1,29 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const MovingPoint = ({ fuseActive }) => {
+const MovingPoint = ({ fuseActive, points }) => {
     const pointRef = useRef();
     const [t, setT] = useState(0);
-    const trail = useRef([]);
+    const [currentPoints, setCurrentPoints] = useState([]);
 
-    const points = [
-        new THREE.Vector3(-1.25, -1.25, 1.25),  // Front bottom left
-        new THREE.Vector3(1.25, 1.25, 1.25),    // Front top right
-        new THREE.Vector3(1.25, 1.25, -1.25),   // Back top right
-        new THREE.Vector3(0, 0, -1.25)          // Back center
-    ];
+    // Update current points when points prop changes
+    useEffect(() => {
+        if (points && points.length > 0) {
+            setCurrentPoints(points);
+        }
+    }, [points]);
 
     useFrame(({ clock }) => {
-        if (pointRef.current && fuseActive) {
+        if (pointRef.current && fuseActive && currentPoints.length > 1) {
             const time = clock.getElapsedTime();
             setT((prev) => (prev + 0.005) % 1);
-            const segmentCount = points.length - 1;
+            const segmentCount = currentPoints.length - 1;
             const segmentIndex = Math.floor(t * segmentCount);
             const segmentT = (t * segmentCount) % 1;
 
-            const startPoint = points[segmentIndex];
-            const endPoint = points[Math.min(segmentIndex + 1, points.length - 1)];
+            const startPoint = currentPoints[segmentIndex];
+            const endPoint = currentPoints[Math.min(segmentIndex + 1, currentPoints.length - 1)];
             const position = new THREE.Vector3()
                 .copy(startPoint)
                 .lerp(endPoint, segmentT);

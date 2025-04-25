@@ -7,12 +7,13 @@ import SmallCube from './SmallCube';
 
 const Cube = ({ position, rotationSpeed, controlsRef }) => {
     const cubeRef = useRef();
+    const wrappingLineRef = useRef();
     const [isDragged, setIsDragged] = useState(false);
     const [lastMousePos, setLastMousePos] = useState(null);
     const [spinToggle, setSpinToggle] = useState(true);
     const [fuseActive, setFuseActive] = useState(true);
+    const [endPoint, setEndPoint] = useState(new THREE.Vector3(0, 0, -1.25));
     const keyRotationSpeed = 2;
-    const endPoint = new THREE.Vector3(0, 0, -1.25);
 
     useEffect(() => {
         console.log('Cube initialized, controlsRef:', !!controlsRef.current);
@@ -125,9 +126,21 @@ const Cube = ({ position, rotationSpeed, controlsRef }) => {
         };
     }, [isDragged]);
 
+    const handlePointsGenerated = (points) => {
+        if (points && points.length > 0) {
+            setEndPoint(points[points.length - 1]);
+        }
+    };
+
+    const handleCubeClick = () => {
+        if (!isDragged && wrappingLineRef.current) {
+            wrappingLineRef.current.generateRandomPoints();
+        }
+    };
+
     return (
         <group ref={cubeRef} position={position}>
-            <mesh position={[0, 0, 0]} onPointerDown={handlePointerDown} castShadow receiveShadow>
+            <mesh position={[0, 0, 0]} onPointerDown={handlePointerDown} onClick={handleCubeClick} castShadow receiveShadow>
                 <boxGeometry args={[2.5, 2.5, 2.5]} />
                 <meshStandardMaterial
                     color={spinToggle ? 'hotpink' : 'blue'}
@@ -138,8 +151,8 @@ const Cube = ({ position, rotationSpeed, controlsRef }) => {
                 />
             </mesh>
             <CubeLines />
-            <WrappingLine />
-            <MovingPoint fuseActive={fuseActive} />
+            <WrappingLine ref={wrappingLineRef} onPointsGenerated={handlePointsGenerated} />
+            <MovingPoint fuseActive={fuseActive} points={wrappingLineRef.current?.getPoints() || []} />
             <SmallCube position={endPoint} setFuseActive={setFuseActive} />
         </group>
     );
