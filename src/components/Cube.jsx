@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
 import WrappingLine from './WrappingLine';
 import MovingPoint from './MovingPoint';
 import CubeLines from './CubeLines';
@@ -14,6 +15,13 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
     const [fuseActive, setFuseActive] = useState(true);
     const [endPoint, setEndPoint] = useState(new THREE.Vector3(0, 0, -1.25));
     const keyRotationSpeed = 2;
+
+    // Physics properties
+    const [hasGravity, setHasGravity] = useState(false);
+    const [velocity, setVelocity] = useState(new THREE.Vector3(0, 0, 0));
+    const gravity = 0.01;
+    const initialPosition = useMemo(() => new THREE.Vector3().copy(position), [position]);
+    const floorY = -40; // Floor level in the scene
 
     // Generate a unique seed based on the cube index
     const uniqueSeed = useMemo(() => {
@@ -141,10 +149,55 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
 
     const handleSmallCubeClick = () => {
         if (isGameRunning) {
-            setFuseActive(false);
+            // First update the game state
             onCubeClick();
+
+            // Then update local state
+            setFuseActive(false);
+
+            // Enable gravity when small cube is clicked
+            console.log("Small cube clicked, enabling gravity");
+            setHasGravity(true);
+
+            // Add a small random initial velocity for more interesting movement
+            setVelocity(new THREE.Vector3(
+                (Math.random() - 0.5) * 0.1,
+                0.05, // Small upward initial velocity
+                (Math.random() - 0.5) * 0.1
+            ));
         }
     };
+
+    // Apply physics in the animation frame
+    useFrame(() => {
+        if (hasGravity && cubeRef.current) {
+            // Apply gravity to velocity
+            velocity.y -= gravity;
+
+            // Update position based on velocity
+            const newPosition = cubeRef.current.position.clone();
+            newPosition.add(velocity);
+
+            // Check for floor collision
+            if (newPosition.y <= floorY) {
+                newPosition.y = floorY;
+                velocity.y = -velocity.y * 0.5; // Bounce with energy loss
+
+                // If velocity is very small, stop bouncing
+                if (Math.abs(velocity.y) < 0.01) {
+                    velocity.y = 0;
+                }
+            }
+
+            // Apply new position
+            cubeRef.current.position.copy(newPosition);
+        }
+    });
+
+    // Debug log to check if gravity is enabled
+    useEffect(() => {
+        console.log(`Cube ${cubeIndex} gravity state:`, hasGravity);
+    }, [hasGravity, cubeIndex]);
 
     return (
         <group ref={cubeRef} position={position}>
