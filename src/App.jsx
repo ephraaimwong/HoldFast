@@ -1,12 +1,12 @@
+import React, { useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import './App.css';
 import Scene from './components/Scene';
 import MirrorRoom from './MirrorRoom';
 import * as THREE from 'three';
-import { useRef, useState } from 'react';
 
 function App() {
-    const [showMirrorRoom, setShowMirrorRoom] = useState(false);
+    const [showMirrorRoom, setShowMirrorRoom] = useState(true);
     const [showGridHelper, setShowGridHelper] = useState(false);
     const [showAxesHelper, setShowAxesHelper] = useState(false);
     const controlsRef = useRef();
@@ -58,8 +58,7 @@ function App() {
                     borderRadius: '8px',
                 }}
             >
-                <h1>HoldFast DEMO</h1>
-                <p>-- Proof of Concept --</p>
+                <h1>HoldFast</h1>
                 <p>I J K L - Move light/sphere</p>
                 <p>W A S D / Arrows - Rotate cube</p>
                 <p>Click & Drag - Spin cube</p>
