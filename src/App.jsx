@@ -72,7 +72,7 @@ function App() {
         setShowVictoryMessage(false);
         setShowGameOverMessage(false);
         if (!isGameRunning) {
-            setTimer(30);
+            setTimer(60);
             setClickedCubes(new Set());
             setAutoRotateCamera(false);
         } else {
@@ -82,7 +82,18 @@ function App() {
 
     const handleCubeClick = (cubeIndex) => {
         if (isGameRunning) {
-            setClickedCubes(prev => new Set([...prev, cubeIndex]));
+            if (cubeIndex === -1) {
+                // Fuse completed - game over
+                setIsGameRunning(false);
+                setShowGameOverMessage(true);
+                setAutoRotateCamera(true);
+                // Hide game over message after 5 seconds
+                setTimeout(() => {
+                    setShowGameOverMessage(false);
+                }, 5000);
+            } else {
+                setClickedCubes(prev => new Set([...prev, cubeIndex]));
+            }
         }
     };
 

@@ -1,5 +1,6 @@
 import React, { useRef, useState, useMemo, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
 
 const WrappingLine = forwardRef(({ onPointsGenerated, seed = Math.random() }, ref) => {
     const lineRef = useRef();
@@ -74,6 +75,18 @@ const WrappingLine = forwardRef(({ onPointsGenerated, seed = Math.random() }, re
     useMemo(() => {
         generateRandomPoints();
     }, []);
+
+    // Update the line geometry every frame
+    useFrame(() => {
+        if (lineRef.current && points.length > 0) {
+            const positions = new Float32Array(points.flatMap(p => [p.x, p.y, p.z]));
+            lineRef.current.geometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(positions, 3)
+            );
+            lineRef.current.geometry.attributes.position.needsUpdate = true;
+        }
+    });
 
     return (
         <line ref={lineRef}>

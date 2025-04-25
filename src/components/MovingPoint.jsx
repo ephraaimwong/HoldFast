@@ -2,11 +2,14 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const MovingPoint = ({ fuseActive, points }) => {
+const MovingPoint = ({ fuseActive, points, onFuseComplete }) => {
     const pointRef = useRef();
     const [t, setT] = useState(0);
     const [currentPoints, setCurrentPoints] = useState([]);
     const [movementTime, setMovementTime] = useState(0);
+    const [hasCompleted, setHasCompleted] = useState(false);
+    const tRef = useRef(0); // Use ref for smoother updates
+    const lastPointsRef = useRef([]); // Store the last valid points
 
     // Generate a random movement time between 5 and 9 seconds
     useEffect(() => {
@@ -14,30 +17,64 @@ const MovingPoint = ({ fuseActive, points }) => {
         setMovementTime(randomTime);
     }, []);
 
+    // Reset completion state when fuseActive changes
+    useEffect(() => {
+        if (fuseActive) {
+            setHasCompleted(false);
+            setT(0);
+            tRef.current = 0;
+        }
+    }, [fuseActive]);
+
     // Update current points when points prop changes
     useEffect(() => {
         if (points && points.length > 0) {
             setCurrentPoints(points);
+            lastPointsRef.current = [...points]; // Store a copy of the points
         }
     }, [points]);
 
     useFrame(({ clock }) => {
-        if (pointRef.current && fuseActive && currentPoints.length > 1) {
+        if (pointRef.current && fuseActive && currentPoints.length > 1 && !hasCompleted) {
             // Use the random movement time to control the speed
             const speed = 1 / movementTime;
-            setT((prev) => (prev + speed * 0.016) % 1); // 0.016 is approximately 1/60 for 60fps
+            const newT = tRef.current + speed * 0.016; // 0.016 is approximately 1/60 for 60fps
 
-            const segmentCount = currentPoints.length - 1;
-            const segmentIndex = Math.floor(t * segmentCount);
-            const segmentT = (t * segmentCount) % 1;
+            // Check if the animation has completed
+            if (newT >= 1) {
+                setHasCompleted(true);
+                if (onFuseComplete) {
+                    onFuseComplete();
+                }
+                return;
+            }
 
-            const startPoint = currentPoints[segmentIndex];
-            const endPoint = currentPoints[Math.min(segmentIndex + 1, currentPoints.length - 1)];
-            const position = new THREE.Vector3()
-                .copy(startPoint)
-                .lerp(endPoint, segmentT);
+            // Update the ref for smoother animation
+            tRef.current = newT;
+            setT(newT);
 
-            pointRef.current.position.copy(position);
+            // Use the stored points to ensure consistency
+            const pointsToUse = lastPointsRef.current.length > 0 ? lastPointsRef.current : currentPoints;
+            const segmentCount = pointsToUse.length - 1;
+
+            // Calculate which segment we're on and how far along that segment
+            const totalLength = newT * segmentCount;
+            const segmentIndex = Math.floor(totalLength);
+            const segmentT = totalLength - segmentIndex;
+
+            // Ensure we have valid points
+            if (segmentIndex >= 0 && segmentIndex < pointsToUse.length - 1) {
+                const startPoint = pointsToUse[segmentIndex];
+                const endPoint = pointsToUse[segmentIndex + 1];
+
+                // Create a new position vector for each frame
+                const position = new THREE.Vector3()
+                    .copy(startPoint)
+                    .lerp(endPoint, segmentT);
+
+                // Update the point position
+                pointRef.current.position.copy(position);
+            }
         }
     });
 

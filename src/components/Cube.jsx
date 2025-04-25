@@ -12,7 +12,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
     const [isDragged, setIsDragged] = useState(false);
     const [lastMousePos, setLastMousePos] = useState(null);
     const [spinToggle, setSpinToggle] = useState(true);
-    const [fuseActive, setFuseActive] = useState(true);
+    const [fuseActive, setFuseActive] = useState(false);
     const [endPoint, setEndPoint] = useState(new THREE.Vector3(0, 0, -1.25));
     const keyRotationSpeed = 2;
 
@@ -184,6 +184,26 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
         }
     };
 
+    const handleFuseComplete = () => {
+        if (isGameRunning) {
+            // Change color to red
+            setCubeColor('red');
+
+            // Enable gravity
+            setHasGravity(true);
+
+            // Add an explosive upward velocity
+            setVelocity(new THREE.Vector3(
+                (Math.random() - 0.5) * 0.2,
+                0.2, // Stronger upward velocity for explosion effect
+                (Math.random() - 0.5) * 0.2
+            ));
+
+            // Trigger game over
+            onCubeClick(-1); // Pass -1 to indicate failure
+        }
+    };
+
     // Apply physics in the animation frame
     useFrame(() => {
         if (hasGravity && cubeRef.current) {
@@ -237,6 +257,41 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
         console.log(`Cube ${cubeIndex} gravity state:`, hasGravity);
     }, [hasGravity, cubeIndex]);
 
+    // Effect to handle game state changes
+    useEffect(() => {
+        if (isGameRunning) {
+            // Start the fuse when game starts
+            setFuseActive(true);
+            // Reset cube state
+            setHasGravity(false);
+            setCubeColor(spinToggle ? 'grey' : 'blue');
+            if (cubeRef.current) {
+                cubeRef.current.scale.copy(initialScale.current);
+                cubeRef.current.position.copy(initialPosition);
+            }
+            setVelocity(new THREE.Vector3(0, 0, 0));
+            setIsShrinking(false);
+            setShrinkProgress(0);
+            // Generate new points for the line
+            if (wrappingLineRef.current) {
+                wrappingLineRef.current.generateRandomPoints();
+            }
+        } else {
+            // Stop the fuse when game ends
+            setFuseActive(false);
+        }
+    }, [isGameRunning, initialPosition, spinToggle]);
+
+    // Update endPoint when points change
+    useEffect(() => {
+        if (wrappingLineRef.current) {
+            const points = wrappingLineRef.current.getPoints();
+            if (points && points.length > 0) {
+                setEndPoint(points[points.length - 1]);
+            }
+        }
+    }, [wrappingLineRef.current?.getPoints()]);
+
     return (
         <group ref={cubeRef} position={position}>
             <mesh position={[0, 0, 0]} onPointerDown={handlePointerDown} onClick={handleCubeClick} castShadow receiveShadow>
@@ -251,7 +306,11 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
             </mesh>
             <CubeLines />
             <WrappingLine ref={wrappingLineRef} onPointsGenerated={handlePointsGenerated} seed={uniqueSeed} />
-            <MovingPoint fuseActive={fuseActive} points={wrappingLineRef.current?.getPoints() || []} />
+            <MovingPoint
+                fuseActive={fuseActive}
+                points={wrappingLineRef.current?.getPoints() || []}
+                onFuseComplete={handleFuseComplete}
+            />
             <SmallCube position={endPoint} setFuseActive={setFuseActive} onSmallCubeClick={handleSmallCubeClick} color="white" scale={0.3} />
         </group>
     );
