@@ -2,6 +2,7 @@ import { useRef, useMemo, useEffect } from 'react';
 import { MeshReflectorMaterial, OrbitControls, Stars } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
 export default function MirrorRoom({ setControlsRef }) {
   const leftWallRef = useRef();
@@ -42,6 +43,9 @@ export default function MirrorRoom({ setControlsRef }) {
 
   return (
     <>
+      <EffectComposer>
+        <Bloom luminanceThreshold={0.1} luminanceSmoothing={0.9} height={300} intensity={1.2} />
+      </EffectComposer>
       <color attach="background" args={['#000']} />
       <fog attach="fog" args={['#111111', 50, 400]} />
 
