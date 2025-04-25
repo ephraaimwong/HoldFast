@@ -14,6 +14,7 @@ function App() {
     const [clickedCubes, setClickedCubes] = useState(new Set());
     const [autoRotateCamera, setAutoRotateCamera] = useState(true);
     const [showVictoryMessage, setShowVictoryMessage] = useState(false);
+    const [showGameOverMessage, setShowGameOverMessage] = useState(false);
     const controlsRef = useRef();
 
     useEffect(() => {
@@ -24,13 +25,22 @@ function App() {
             }, 1000);
         } else if (timer === 0) {
             setIsGameRunning(false);
+            // Show game over message if not all cubes are clicked
+            if (clickedCubes.size < 6) {
+                setShowGameOverMessage(true);
+                // Hide game over message after 5 seconds
+                const timeoutId = setTimeout(() => {
+                    setShowGameOverMessage(false);
+                }, 5000);
+                return () => clearTimeout(timeoutId);
+            }
         }
         return () => {
             if (intervalId) {
                 clearInterval(intervalId);
             }
         };
-    }, [isGameRunning, timer]);
+    }, [isGameRunning, timer, clickedCubes.size]);
 
     // Check if all cubes are clicked
     useEffect(() => {
@@ -60,8 +70,9 @@ function App() {
     const toggleGame = () => {
         setIsGameRunning(prev => !prev);
         setShowVictoryMessage(false);
+        setShowGameOverMessage(false);
         if (!isGameRunning) {
-            setTimer(60);
+            setTimer(30);
             setClickedCubes(new Set());
             setAutoRotateCamera(false);
         } else {
@@ -126,6 +137,28 @@ function App() {
                     }}
                 >
                     Clear! Score: {timer}s
+                </div>
+            )}
+
+            {showGameOverMessage && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 2,
+                        color: 'white',
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        padding: '2rem',
+                        borderRadius: '8px',
+                        textAlign: 'center',
+                        fontSize: '2rem',
+                        fontWeight: 'bold',
+                        animation: 'fadeIn 0.5s ease-in',
+                    }}
+                >
+                    Game Over! Cubes clicked: {clickedCubes.size}/6
                 </div>
             )}
 
@@ -202,41 +235,46 @@ function App() {
                             borderRadius: '4px',
                             cursor: 'pointer',
                             fontSize: '1rem',
+                            width: '100%',
                         }}
                     >
                         {showMirrorRoom ? 'Hide Mirror Room' : 'Show Mirror Room'}
                     </button>
                 </p>
-                <p>Toggle Grid Helper - Button below</p>
-                <button
-                    onClick={toggleGridHelper}
-                    style={{
-                        padding: '0.5rem',
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        color: 'white',
-                        border: '1px solid white',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '1rem',
-                    }}
-                >
-                    {showGridHelper ? 'Hide Grid' : 'Show Grid'}
-                </button>
-                <p>Toggle Axes Helper - Button below</p>
-                <button
-                    onClick={toggleAxesHelper}
-                    style={{
-                        padding: '0.5rem',
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        color: 'white',
-                        border: '1px solid white',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '1rem',
-                    }}
-                >
-                    {showAxesHelper ? 'Hide Axes' : 'Show Axes'}
-                </button>
+                <p>
+                    <button
+                        onClick={toggleGridHelper}
+                        style={{
+                            padding: '0.5rem',
+                            backgroundColor: 'rgba(255,255,255,0.2)',
+                            color: 'white',
+                            border: '1px solid white',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '1rem',
+                            width: '100%',
+                        }}
+                    >
+                        {showGridHelper ? 'Hide Grid' : 'Show Grid'}
+                    </button>
+                </p>
+                <p>
+                    <button
+                        onClick={toggleAxesHelper}
+                        style={{
+                            padding: '0.5rem',
+                            backgroundColor: 'rgba(255,255,255,0.2)',
+                            color: 'white',
+                            border: '1px solid white',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '1rem',
+                            width: '100%',
+                        }}
+                    >
+                        {showAxesHelper ? 'Hide Axes' : 'Show Axes'}
+                    </button>
+                </p>
             </div>
         </>
     );
