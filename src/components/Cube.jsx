@@ -26,7 +26,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
     // Animation properties
     const [isShrinking, setIsShrinking] = useState(false);
     const [shrinkProgress, setShrinkProgress] = useState(0);
-    const [cubeColor, setCubeColor] = useState(spinToggle ? 'hotpink' : 'blue');
+    const [cubeColor, setCubeColor] = useState(spinToggle ? 'grey' : 'blue');
     const shrinkDuration = 1000; // 1 second for shrinking animation
     const shrinkStartTime = useRef(0);
     const initialScale = useRef(new THREE.Vector3(1, 1, 1));
@@ -252,7 +252,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
             <CubeLines />
             <WrappingLine ref={wrappingLineRef} onPointsGenerated={handlePointsGenerated} seed={uniqueSeed} />
             <MovingPoint fuseActive={fuseActive} points={wrappingLineRef.current?.getPoints() || []} />
-            <SmallCube position={endPoint} setFuseActive={setFuseActive} onSmallCubeClick={handleSmallCubeClick} />
+            <SmallCube position={endPoint} setFuseActive={setFuseActive} onSmallCubeClick={handleSmallCubeClick} color="white" scale={0.3} />
         </group>
     );
 };
