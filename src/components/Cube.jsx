@@ -5,10 +5,12 @@ import MovingPoint from './MovingPoint';
 import CubeLines from './CubeLines';
 import SmallCube from './SmallCube';
 
-const Cube = ({ spinToggle, setSpinToggle, rotationSpeed, controlsRef, fuseActive, setFuseActive }) => {
+const Cube = ({ position, rotationSpeed, controlsRef }) => {
     const cubeRef = useRef();
     const [isDragged, setIsDragged] = useState(false);
     const [lastMousePos, setLastMousePos] = useState(null);
+    const [spinToggle, setSpinToggle] = useState(true);
+    const [fuseActive, setFuseActive] = useState(true);
     const keyRotationSpeed = 2;
     const endPoint = new THREE.Vector3(0, 0, -1.25);
 
@@ -124,7 +126,7 @@ const Cube = ({ spinToggle, setSpinToggle, rotationSpeed, controlsRef, fuseActiv
     }, [isDragged]);
 
     return (
-        <group ref={cubeRef} position={[0, 1.25, 0]}>
+        <group ref={cubeRef} position={position}>
             <mesh position={[0, 0, 0]} onPointerDown={handlePointerDown} castShadow receiveShadow>
                 <boxGeometry args={[2.5, 2.5, 2.5]} />
                 <meshStandardMaterial
