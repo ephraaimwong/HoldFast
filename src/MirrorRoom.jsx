@@ -54,9 +54,9 @@ export default function MirrorRoom({setControlsRef}) {
   return (
     <>
     {/* turn off when debugging */}
-      {/* <EffectComposer>
+      <EffectComposer>
         <Bloom luminanceThreshold={0.1} luminanceSmoothing={0.9} height={300} intensity={1.2} />
-      </EffectComposer> */}
+      </EffectComposer>
 
       {/* Orbit Controls moved to Scene for better handling */}
       
