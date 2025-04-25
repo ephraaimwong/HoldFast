@@ -23,6 +23,15 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
     const initialPosition = useMemo(() => new THREE.Vector3().copy(position), [position]);
     const floorY = -40; // Floor level in the scene
 
+    // Animation properties
+    const [isShrinking, setIsShrinking] = useState(false);
+    const [shrinkProgress, setShrinkProgress] = useState(0);
+    const [cubeColor, setCubeColor] = useState(spinToggle ? 'hotpink' : 'blue');
+    const shrinkDuration = 1000; // 1 second for shrinking animation
+    const shrinkStartTime = useRef(0);
+    const initialScale = useRef(new THREE.Vector3(1, 1, 1));
+    const targetScale = new THREE.Vector3(0.5, 0.5, 0.5);
+
     // Generate a unique seed based on the cube index
     const uniqueSeed = useMemo(() => {
         return Math.random() * 1000 + cubeIndex * 1000;
@@ -159,6 +168,13 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
             console.log("Small cube clicked, enabling gravity");
             setHasGravity(true);
 
+            // Start shrinking animation
+            setIsShrinking(true);
+            shrinkStartTime.current = Date.now();
+
+            // Change color to green
+            setCubeColor('green');
+
             // Add a small random initial velocity for more interesting movement
             setVelocity(new THREE.Vector3(
                 (Math.random() - 0.5) * 0.1,
@@ -192,6 +208,28 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
             // Apply new position
             cubeRef.current.position.copy(newPosition);
         }
+
+        // Handle shrinking animation
+        if (isShrinking && cubeRef.current) {
+            const elapsed = Date.now() - shrinkStartTime.current;
+            const progress = Math.min(elapsed / shrinkDuration, 1);
+            setShrinkProgress(progress);
+
+            // Calculate current scale based on progress
+            const currentScale = new THREE.Vector3().lerpVectors(
+                initialScale.current,
+                targetScale,
+                progress
+            );
+
+            // Apply scale to the cube
+            cubeRef.current.scale.copy(currentScale);
+
+            // If animation is complete, stop shrinking
+            if (progress >= 1) {
+                setIsShrinking(false);
+            }
+        }
     });
 
     // Debug log to check if gravity is enabled
@@ -204,7 +242,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
             <mesh position={[0, 0, 0]} onPointerDown={handlePointerDown} onClick={handleCubeClick} castShadow receiveShadow>
                 <boxGeometry args={[2.5, 2.5, 2.5]} />
                 <meshStandardMaterial
-                    color={spinToggle ? 'hotpink' : 'blue'}
+                    color={cubeColor}
                     roughness={0.5}
                     metalness={0.2}
                     transparent
