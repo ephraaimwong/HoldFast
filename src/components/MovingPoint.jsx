@@ -2,6 +2,11 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
+/**
+ * MovingPoint component - Represents the moving point along the fuse line
+ * Handles the animation of a point moving along a path of points
+ * The point moves at a random speed between min and max time
+ */
 const MovingPoint = ({ fuseActive, points, onFuseComplete }) => {
     const pointRef = useRef();
     const [t, setT] = useState(0);
@@ -36,9 +41,13 @@ const MovingPoint = ({ fuseActive, points, onFuseComplete }) => {
 
     useFrame(({ clock }) => {
         if (pointRef.current && fuseActive && currentPoints.length > 1 && !hasCompleted) {
-            // Use the random movement time to control the speed
+            // Calculate speed based on the random movement time
+            // Speed = 1/total_time to ensure the point completes the path in the specified time
             const speed = 1 / movementTime;
-            const newT = tRef.current + speed * 0.016; // 0.016 is approximately 1/60 for 60fps
+
+            // Update progress (t) based on time elapsed
+            // 0.016 is approximately 1/60 for 60fps
+            const newT = tRef.current + speed * 0.016;
 
             // Check if the animation has completed
             if (newT >= 1) {
@@ -58,8 +67,11 @@ const MovingPoint = ({ fuseActive, points, onFuseComplete }) => {
             const segmentCount = pointsToUse.length - 1;
 
             // Calculate which segment we're on and how far along that segment
+            // totalLength = progress * number_of_segments
             const totalLength = newT * segmentCount;
+            // segmentIndex = floor(totalLength) to get the current segment
             const segmentIndex = Math.floor(totalLength);
+            // segmentT = fractional part of totalLength (0 to 1)
             const segmentT = totalLength - segmentIndex;
 
             // Ensure we have valid points
@@ -67,7 +79,7 @@ const MovingPoint = ({ fuseActive, points, onFuseComplete }) => {
                 const startPoint = pointsToUse[segmentIndex];
                 const endPoint = pointsToUse[segmentIndex + 1];
 
-                // Create a new position vector for each frame
+                // Interpolate between start and end points based on segmentT
                 const position = new THREE.Vector3()
                     .copy(startPoint)
                     .lerp(endPoint, segmentT);
