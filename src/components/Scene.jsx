@@ -3,7 +3,7 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import Cube from './Cube';
 
-const Scene = ({ controlsRef, showGridHelper, showAxesHelper, onCubeClick, isGameRunning, autoRotateCamera }) => {
+const Scene = ({ controlsRef, showGridHelper, showAxesHelper, onCubeClick, onFuseComplete, isGameRunning, autoRotateCamera }) => {
     const rotationSpeed = 0.01;
 
     // Use randomized positions for the cubes while ensuring no overlap
@@ -91,6 +91,7 @@ const Scene = ({ controlsRef, showGridHelper, showAxesHelper, onCubeClick, isGam
                     controlsRef={controlsRef}
                     cubeIndex={index}
                     onCubeClick={() => onCubeClick(index)}
+                    onFuseComplete={onFuseComplete}
                     isGameRunning={isGameRunning}
                 />
             ))}

@@ -6,7 +6,7 @@ import MovingPoint from './MovingPoint';
 import CubeLines from './CubeLines';
 import SmallCube from './SmallCube';
 
-const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, isGameRunning }) => {
+const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, onFuseComplete, isGameRunning }) => {
     const cubeRef = useRef();
     const wrappingLineRef = useRef();
     const [isDragged, setIsDragged] = useState(false);
@@ -159,13 +159,12 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
     const handleSmallCubeClick = () => {
         if (isGameRunning) {
             // First update the game state
-            onCubeClick();
+            onCubeClick(cubeIndex);
 
             // Then update local state
             setFuseActive(false);
 
             // Enable gravity when small cube is clicked
-            console.log("Small cube clicked, enabling gravity");
             setHasGravity(true);
 
             // Start shrinking animation
@@ -199,8 +198,8 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, is
                 (Math.random() - 0.5) * 0.2
             ));
 
-            // Trigger game over
-            onCubeClick(-1); // Pass -1 to indicate failure
+            // Call the separate fuse completion callback
+            onFuseComplete();
         }
     };
 

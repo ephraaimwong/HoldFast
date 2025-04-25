@@ -82,18 +82,20 @@ function App() {
 
     const handleCubeClick = (cubeIndex) => {
         if (isGameRunning) {
-            if (cubeIndex === -1) {
-                // Fuse completed - game over
-                setIsGameRunning(false);
-                setShowGameOverMessage(true);
-                setAutoRotateCamera(true);
-                // Hide game over message after 5 seconds
-                setTimeout(() => {
-                    setShowGameOverMessage(false);
-                }, 5000);
-            } else {
-                setClickedCubes(prev => new Set([...prev, cubeIndex]));
-            }
+            setClickedCubes(prev => new Set([...prev, cubeIndex]));
+        }
+    };
+
+    const handleFuseComplete = () => {
+        if (isGameRunning) {
+            // Fuse completed - game over
+            setIsGameRunning(false);
+            setShowGameOverMessage(true);
+            setAutoRotateCamera(true);
+            // Hide game over message after 5 seconds
+            setTimeout(() => {
+                setShowGameOverMessage(false);
+            }, 5000);
         }
     };
 
@@ -124,6 +126,7 @@ function App() {
                     showGridHelper={showGridHelper}
                     showAxesHelper={showAxesHelper}
                     onCubeClick={handleCubeClick}
+                    onFuseComplete={handleFuseComplete}
                     isGameRunning={isGameRunning}
                     autoRotateCamera={autoRotateCamera}
                 />
