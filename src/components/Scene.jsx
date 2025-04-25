@@ -74,7 +74,7 @@ const Scene = ({ controlsRef, showGridHelper, showAxesHelper, onCubeClick, onFus
                 dampingFactor={0.05}
             />
             {showGridHelper && <gridHelper args={[20, 20]} />}
-            {showAxesHelper && <axesHelper args={[5]} />}
+            {showAxesHelper && <axesHelper args={[15]} />}
             <ambientLight intensity={0.5} />
             <directionalLight
                 position={[5, 5, 5]}
