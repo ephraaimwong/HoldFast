@@ -6,6 +6,13 @@ const MovingPoint = ({ fuseActive, points }) => {
     const pointRef = useRef();
     const [t, setT] = useState(0);
     const [currentPoints, setCurrentPoints] = useState([]);
+    const [movementTime, setMovementTime] = useState(0);
+
+    // Generate a random movement time between 5 and 9 seconds
+    useEffect(() => {
+        const randomTime = 5 + Math.random() * 4; // Random time between 5 and 9 seconds
+        setMovementTime(randomTime);
+    }, []);
 
     // Update current points when points prop changes
     useEffect(() => {
@@ -14,9 +21,12 @@ const MovingPoint = ({ fuseActive, points }) => {
         }
     }, [points]);
 
-    useFrame(() => {
+    useFrame(({ clock }) => {
         if (pointRef.current && fuseActive && currentPoints.length > 1) {
-            setT((prev) => (prev + 0.005) % 1);
+            // Use the random movement time to control the speed
+            const speed = 1 / movementTime;
+            setT((prev) => (prev + speed * 0.016) % 1); // 0.016 is approximately 1/60 for 60fps
+
             const segmentCount = currentPoints.length - 1;
             const segmentIndex = Math.floor(t * segmentCount);
             const segmentT = (t * segmentCount) % 1;
