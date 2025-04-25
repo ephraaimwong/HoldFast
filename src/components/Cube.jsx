@@ -6,6 +6,10 @@ import MovingPoint from './MovingPoint';
 import CubeLines from './CubeLines';
 import SmallCube from './SmallCube';
 
+/**
+ * Cube component - Represents a game cube with a fuse and small cube
+ * Handles cube rotation, physics, and game interactions
+ */
 const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, onFuseComplete, isGameRunning }) => {
     const cubeRef = useRef();
     const wrappingLineRef = useRef();
@@ -19,7 +23,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
     // Physics properties
     const [hasGravity, setHasGravity] = useState(false);
     const [velocity, setVelocity] = useState(new THREE.Vector3(0, 0, 0));
-    const gravity = 0.01;
+    const gravity = 0.01; // Gravity strength
     const initialPosition = useMemo(() => new THREE.Vector3().copy(position), [position]);
     const floorY = -40; // Floor level in the scene
 
@@ -32,11 +36,12 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
     const initialScale = useRef(new THREE.Vector3(1, 1, 1));
     const targetScale = new THREE.Vector3(0.5, 0.5, 0.5);
 
-    // Generate a unique seed based on the cube index
+    // Generate a unique seed based on the cube index for consistent randomization
     const uniqueSeed = useMemo(() => {
         return Math.random() * 1000 + cubeIndex * 1000;
     }, [cubeIndex]);
 
+    // Handle keyboard controls for cube rotation
     useEffect(() => {
         const activeKeys = new Set();
         const handleKeyDown = (event) => {
@@ -79,6 +84,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
         };
     }, []);
 
+    // Handle automatic cube rotation when spinToggle is true
     useEffect(() => {
         if (spinToggle && !isDragged) {
             const interval = setInterval(() => {
@@ -91,6 +97,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
         }
     }, [spinToggle, isDragged, rotationSpeed]);
 
+    // Handle mouse drag for cube rotation
     const handlePointerDown = (event) => {
         event.stopPropagation();
         if (controlsRef?.current) {
@@ -106,6 +113,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
         event.preventDefault();
         if (isDragged && lastMousePos) {
             const { innerWidth, innerHeight } = window;
+            // Calculate rotation based on mouse movement relative to window size
             const deltaX = event.movementX * 1.5 / innerWidth;
             const deltaY = event.movementY * 1.5 / innerHeight;
             if (cubeRef.current) {
@@ -130,6 +138,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
         }
     };
 
+    // Add/remove mouse event listeners based on drag state
     useEffect(() => {
         if (isDragged) {
             window.addEventListener('mousemove', handlePointerMove);
@@ -144,18 +153,21 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
         };
     }, [isDragged]);
 
+    // Update endPoint when new points are generated
     const handlePointsGenerated = (points) => {
         if (points && points.length > 0) {
             setEndPoint(points[points.length - 1]);
         }
     };
 
+    // Handle main cube click to generate new points
     const handleCubeClick = () => {
         if (!isDragged && wrappingLineRef.current) {
             wrappingLineRef.current.generateRandomPoints();
         }
     };
 
+    // Handle small cube click - success case
     const handleSmallCubeClick = () => {
         if (isGameRunning) {
             // First update the game state
@@ -176,13 +188,14 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
 
             // Add a small random initial velocity for more interesting movement
             setVelocity(new THREE.Vector3(
-                (Math.random() - 0.5) * 0.1,
+                (Math.random() - 0.5) * 0.1, // Random X velocity
                 0.05, // Small upward initial velocity
-                (Math.random() - 0.5) * 0.1
+                (Math.random() - 0.5) * 0.1  // Random Z velocity
             ));
         }
     };
 
+    // Handle fuse completion - failure case
     const handleFuseComplete = () => {
         if (isGameRunning) {
             // Change color to red
@@ -193,9 +206,9 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
 
             // Add an explosive upward velocity
             setVelocity(new THREE.Vector3(
-                (Math.random() - 0.5) * 0.2,
+                (Math.random() - 0.5) * 0.2, // Random X velocity
                 0.2, // Stronger upward velocity for explosion effect
-                (Math.random() - 0.5) * 0.2
+                (Math.random() - 0.5) * 0.2  // Random Z velocity
             ));
 
             // Call the separate fuse completion callback
@@ -251,12 +264,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, on
         }
     });
 
-    // Debug log to check if gravity is enabled
-    useEffect(() => {
-        console.log(`Cube ${cubeIndex} gravity state:`, hasGravity);
-    }, [hasGravity, cubeIndex]);
-
-    // Effect to handle game state changes
+    // Reset cube state when game starts
     useEffect(() => {
         if (isGameRunning) {
             // Start the fuse when game starts
