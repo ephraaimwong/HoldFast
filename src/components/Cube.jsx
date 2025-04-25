@@ -1,11 +1,11 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import WrappingLine from './WrappingLine';
 import MovingPoint from './MovingPoint';
 import CubeLines from './CubeLines';
 import SmallCube from './SmallCube';
 
-const Cube = ({ position, rotationSpeed, controlsRef }) => {
+const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex }) => {
     const cubeRef = useRef();
     const wrappingLineRef = useRef();
     const [isDragged, setIsDragged] = useState(false);
@@ -15,9 +15,10 @@ const Cube = ({ position, rotationSpeed, controlsRef }) => {
     const [endPoint, setEndPoint] = useState(new THREE.Vector3(0, 0, -1.25));
     const keyRotationSpeed = 2;
 
-    useEffect(() => {
-        console.log('Cube initialized, controlsRef:', !!controlsRef.current);
-    }, [controlsRef]);
+    // Generate a unique seed based on the cube index
+    const uniqueSeed = useMemo(() => {
+        return Math.random() * 1000 + cubeIndex * 1000;
+    }, [cubeIndex]);
 
     useEffect(() => {
         const activeKeys = new Set();
@@ -151,7 +152,7 @@ const Cube = ({ position, rotationSpeed, controlsRef }) => {
                 />
             </mesh>
             <CubeLines />
-            <WrappingLine ref={wrappingLineRef} onPointsGenerated={handlePointsGenerated} />
+            <WrappingLine ref={wrappingLineRef} onPointsGenerated={handlePointsGenerated} seed={uniqueSeed} />
             <MovingPoint fuseActive={fuseActive} points={wrappingLineRef.current?.getPoints() || []} />
             <SmallCube position={endPoint} setFuseActive={setFuseActive} />
         </group>

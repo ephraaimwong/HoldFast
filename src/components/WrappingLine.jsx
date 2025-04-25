@@ -1,14 +1,21 @@
 import React, { useRef, useState, useMemo, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
 
-const WrappingLine = forwardRef(({ onPointsGenerated }, ref) => {
+const WrappingLine = forwardRef(({ onPointsGenerated, seed = Math.random() }, ref) => {
     const lineRef = useRef();
     const [points, setPoints] = useState([]);
     const cubeSize = 2.5;
     const halfSize = cubeSize / 2;
 
+    // Create a seeded random number generator
+    const seededRandom = () => {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+    };
+
     const generatePointOnFace = (face) => {
-        const random = () => THREE.MathUtils.randFloatSpread(halfSize);
+        // Use seeded random instead of MathUtils.randFloatSpread
+        const random = () => (seededRandom() * 2 - 1) * halfSize;
 
         switch (face) {
             case 'Front':

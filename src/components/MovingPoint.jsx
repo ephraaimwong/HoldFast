@@ -14,9 +14,8 @@ const MovingPoint = ({ fuseActive, points }) => {
         }
     }, [points]);
 
-    useFrame(({ clock }) => {
+    useFrame(() => {
         if (pointRef.current && fuseActive && currentPoints.length > 1) {
-            const time = clock.getElapsedTime();
             setT((prev) => (prev + 0.005) % 1);
             const segmentCount = currentPoints.length - 1;
             const segmentIndex = Math.floor(t * segmentCount);

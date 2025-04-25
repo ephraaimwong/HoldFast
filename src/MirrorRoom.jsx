@@ -2,7 +2,6 @@ import { useRef, useMemo, useEffect } from 'react';
 import { MeshReflectorMaterial, OrbitControls, Stars } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
 
 export default function MirrorRoom({ setControlsRef }) {
   const leftWallRef = useRef();

@@ -44,6 +44,7 @@ const Scene = ({ controlsRef, showGridHelper, showAxesHelper }) => {
                     position={position}
                     rotationSpeed={rotationSpeed}
                     controlsRef={controlsRef}
+                    cubeIndex={index}
                 />
             ))}
         </>
