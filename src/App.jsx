@@ -245,7 +245,6 @@ function App() {
                         {autoRotateCamera ? 'Auto-Rotate: On' : 'Auto-Rotate: Off'}
                     </button>
                 </div>
-                <p>I J K L - Move light/sphere</p>
                 <p>W A S D / Arrows - Rotate cube</p>
                 <p>Click & Drag - Spin cube</p>
                 <p>Click Small Cube - Stop moving point</p>
