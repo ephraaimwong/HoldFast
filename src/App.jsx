@@ -16,6 +16,7 @@ function App() {
     const [showVictoryMessage, setShowVictoryMessage] = useState(false);
     const [showGameOverMessage, setShowGameOverMessage] = useState(false);
     const controlsRef = useRef();
+    const pointsPerCube = 10; // Points awarded for each cube clicked
 
     useEffect(() => {
         let intervalId;
@@ -105,6 +106,16 @@ function App() {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // Calculate the final score
+    const calculateScore = () => {
+        return timer + (clickedCubes.size * pointsPerCube);
+    };
+
+    // Format the score with leading zeros
+    const formatScore = (score) => {
+        return score.toString().padStart(2, '0');
+    };
+
     return (
         <>
             <Canvas
@@ -150,7 +161,7 @@ function App() {
                         animation: 'fadeIn 0.5s ease-in',
                     }}
                 >
-                    Clear! Score: {timer}s
+                    Score: {formatScore(calculateScore())}
                 </div>
             )}
 
@@ -172,7 +183,7 @@ function App() {
                         animation: 'fadeIn 0.5s ease-in',
                     }}
                 >
-                    Game Over! Cubes clicked: {clickedCubes.size}/6
+                    Kaboom! Score: {formatScore(calculateScore())}
                 </div>
             )}
 
