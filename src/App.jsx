@@ -12,6 +12,8 @@ function App() {
     const [isGameRunning, setIsGameRunning] = useState(false);
     const [timer, setTimer] = useState(45);
     const [clickedCubes, setClickedCubes] = useState(new Set());
+    const [autoRotateCamera, setAutoRotateCamera] = useState(true);
+    const [showVictoryMessage, setShowVictoryMessage] = useState(false);
     const controlsRef = useRef();
 
     useEffect(() => {
@@ -34,7 +36,12 @@ function App() {
     useEffect(() => {
         if (isGameRunning && clickedCubes.size === 3) {
             setIsGameRunning(false);
-            // You could add a victory sound or effect here
+            setShowVictoryMessage(true);
+            // Hide victory message after 5 seconds
+            const timeoutId = setTimeout(() => {
+                setShowVictoryMessage(false);
+            }, 5000);
+            return () => clearTimeout(timeoutId);
         }
     }, [clickedCubes, isGameRunning]);
 
@@ -52,9 +59,13 @@ function App() {
 
     const toggleGame = () => {
         setIsGameRunning(prev => !prev);
+        setShowVictoryMessage(false);
         if (!isGameRunning) {
             setTimer(45);
             setClickedCubes(new Set()); // Reset clicked cubes when starting new game
+            setAutoRotateCamera(false); // Disable auto-rotation when game starts
+        } else {
+            setAutoRotateCamera(true); // Re-enable auto-rotation when game stops
         }
     };
 
@@ -92,8 +103,31 @@ function App() {
                     showAxesHelper={showAxesHelper}
                     onCubeClick={handleCubeClick}
                     isGameRunning={isGameRunning}
+                    autoRotateCamera={autoRotateCamera}
                 />
             </Canvas>
+
+            {showVictoryMessage && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 2,
+                        color: 'white',
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        padding: '2rem',
+                        borderRadius: '8px',
+                        textAlign: 'center',
+                        fontSize: '2rem',
+                        fontWeight: 'bold',
+                        animation: 'fadeIn 0.5s ease-in',
+                    }}
+                >
+                    Clear! Score: {timer}s
+                </div>
+            )}
 
             <div
                 style={{
@@ -130,9 +164,27 @@ function App() {
                             cursor: 'pointer',
                             fontSize: '1rem',
                             width: '100%',
+                            marginBottom: '0.5rem',
                         }}
                     >
                         {isGameRunning ? 'Stop Game' : 'Start Game'}
+                    </button>
+                    <button
+                        onClick={() => setAutoRotateCamera(!autoRotateCamera)}
+                        disabled={isGameRunning}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: autoRotateCamera ? 'rgba(0,255,0,0.2)' : 'rgba(255,255,255,0.2)',
+                            color: 'white',
+                            border: '1px solid white',
+                            borderRadius: '4px',
+                            cursor: isGameRunning ? 'not-allowed' : 'pointer',
+                            fontSize: '1rem',
+                            width: '100%',
+                            opacity: isGameRunning ? 0.5 : 1,
+                        }}
+                    >
+                        {autoRotateCamera ? 'Auto-Rotate: On' : 'Auto-Rotate: Off'}
                     </button>
                 </div>
                 <p>I J K L - Move light/sphere</p>
