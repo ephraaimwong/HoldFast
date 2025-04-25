@@ -5,7 +5,7 @@ import MovingPoint from './MovingPoint';
 import CubeLines from './CubeLines';
 import SmallCube from './SmallCube';
 
-const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex }) => {
+const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex, onCubeClick, isGameRunning }) => {
     const cubeRef = useRef();
     const wrappingLineRef = useRef();
     const [isDragged, setIsDragged] = useState(false);
@@ -139,6 +139,13 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex }) => {
         }
     };
 
+    const handleSmallCubeClick = () => {
+        if (isGameRunning) {
+            setFuseActive(false);
+            onCubeClick();
+        }
+    };
+
     return (
         <group ref={cubeRef} position={position}>
             <mesh position={[0, 0, 0]} onPointerDown={handlePointerDown} onClick={handleCubeClick} castShadow receiveShadow>
@@ -154,7 +161,7 @@ const Cube = ({ position, rotationSpeed, controlsRef, cubeIndex }) => {
             <CubeLines />
             <WrappingLine ref={wrappingLineRef} onPointsGenerated={handlePointsGenerated} seed={uniqueSeed} />
             <MovingPoint fuseActive={fuseActive} points={wrappingLineRef.current?.getPoints() || []} />
-            <SmallCube position={endPoint} setFuseActive={setFuseActive} />
+            <SmallCube position={endPoint} setFuseActive={setFuseActive} onSmallCubeClick={handleSmallCubeClick} />
         </group>
     );
 };
