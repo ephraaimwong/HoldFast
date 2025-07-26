@@ -383,14 +383,14 @@ const Scene = ({showGridHelper, showAxesHelper}) => {
             <ambientLight intensity={0.1} /> //
             <spotLight
                 position={pos}
-                angle={Math.PI / 4}
+                angle={Math.PI / 6}
                 penumbra={0.5}
                 intensity={500} //brightness of spotlight
                 castShadow
                 color="lightyellow"
-                distance={50}
-                shadow-mapSize-width={1024} //increase for more detail
-                shadow-mapSize-height={1024} //increase for more detail
+                distance={40}
+                shadow-mapSize-width={2048} //increase for more detail
+                shadow-mapSize-height={2048} //increase for more detail
                 target-position={[0, 0, 0]}
             />
             {/* spotlight cube thingy */}
